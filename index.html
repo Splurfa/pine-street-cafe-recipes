@@ -1,0 +1,1251 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Pine Street Cafe | Recipe Book</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@500;600&family=DM+Sans:wght@400;500;600&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --cream: #F5F0E6;
+            --warm-white: #FAF8F3;
+            --leather: #8B4513;
+            --leather-dark: #5D2E0C;
+            --copper: #B87333;
+            --charcoal: #2C2C2C;
+            --sage: #87907D;
+            --parchment: #F0E6D3;
+            --shadow: rgba(44, 44, 44, 0.06);
+
+            /* Category colors - muted, professional */
+            --cat-breakfast: #C4956A;
+            --cat-soups: #7A9E7A;
+            --cat-main: #B07070;
+            --cat-sauces: #8A7A9E;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'DM Sans', sans-serif;
+            background: var(--cream);
+            color: var(--charcoal);
+            min-height: 100vh;
+        }
+
+        /* Header - Condensed */
+        header {
+            background: var(--leather-dark);
+            padding: 1.25rem 2rem;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            position: sticky;
+            top: 0;
+            z-index: 50;
+            box-shadow: 0 2px 12px rgba(0,0,0,0.15);
+        }
+
+        .brand {
+            display: flex;
+            align-items: baseline;
+            gap: 0.75rem;
+        }
+
+        header h1 {
+            font-family: 'Playfair Display', serif;
+            font-size: 1.5rem;
+            font-weight: 600;
+            color: var(--cream);
+            letter-spacing: 0.01em;
+        }
+
+        .brand-divider {
+            color: var(--copper);
+            opacity: 0.5;
+        }
+
+        .brand-sub {
+            font-size: 0.85rem;
+            color: var(--copper);
+            font-weight: 500;
+            letter-spacing: 0.05em;
+            text-transform: uppercase;
+        }
+
+        /* Search in header */
+        .header-search {
+            position: relative;
+            width: 280px;
+        }
+
+        .header-search input {
+            width: 100%;
+            padding: 0.6rem 1rem 0.6rem 2.4rem;
+            font-size: 0.9rem;
+            font-family: 'DM Sans', sans-serif;
+            border: none;
+            border-radius: 6px;
+            background: rgba(255,255,255,0.12);
+            color: var(--cream);
+            transition: all 0.2s ease;
+        }
+
+        .header-search input:focus {
+            outline: none;
+            background: rgba(255,255,255,0.2);
+        }
+
+        .header-search input::placeholder {
+            color: rgba(255,255,255,0.5);
+        }
+
+        .header-search::before {
+            content: '';
+            position: absolute;
+            left: 0.8rem;
+            top: 50%;
+            transform: translateY(-50%);
+            width: 14px;
+            height: 14px;
+            background: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 24 24' stroke='rgba(255,255,255,0.5)'%3E%3Cpath stroke-linecap='round' stroke-linejoin='round' stroke-width='2' d='M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z'/%3E%3C/svg%3E") center/contain no-repeat;
+        }
+
+        /* Layout */
+        .layout {
+            display: flex;
+            min-height: calc(100vh - 62px);
+        }
+
+        /* Sidebar */
+        .sidebar {
+            width: 200px;
+            background: var(--warm-white);
+            border-right: 1px solid rgba(135, 144, 125, 0.15);
+            padding: 1.5rem 0;
+            position: sticky;
+            top: 62px;
+            height: calc(100vh - 62px);
+            flex-shrink: 0;
+        }
+
+        .sidebar-title {
+            font-size: 0.7rem;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 0.1em;
+            color: var(--sage);
+            padding: 0 1.25rem;
+            margin-bottom: 0.75rem;
+        }
+
+        .category-list {
+            list-style: none;
+        }
+
+        .category-item {
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+            padding: 0.7rem 1.25rem;
+            cursor: pointer;
+            transition: all 0.15s ease;
+            border-left: 3px solid transparent;
+        }
+
+        .category-item:hover {
+            background: var(--parchment);
+        }
+
+        .category-item.active {
+            background: var(--parchment);
+            border-left-color: var(--leather);
+        }
+
+        .category-dot {
+            width: 10px;
+            height: 10px;
+            border-radius: 2px;
+            flex-shrink: 0;
+        }
+
+        .category-dot.all { background: var(--charcoal); }
+        .category-dot.breakfast { background: var(--cat-breakfast); }
+        .category-dot.soups { background: var(--cat-soups); }
+        .category-dot.main { background: var(--cat-main); }
+        .category-dot.sauces { background: var(--cat-sauces); }
+
+        .category-name {
+            font-size: 0.9rem;
+            font-weight: 500;
+            color: var(--charcoal);
+            flex: 1;
+        }
+
+        .category-count {
+            font-size: 0.75rem;
+            color: var(--sage);
+            background: rgba(135, 144, 125, 0.15);
+            padding: 0.15rem 0.5rem;
+            border-radius: 10px;
+        }
+
+        /* Main Content */
+        main {
+            flex: 1;
+            padding: 1.5rem 2rem;
+            max-width: 900px;
+        }
+
+        .results-header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            margin-bottom: 1rem;
+            padding-bottom: 0.75rem;
+            border-bottom: 1px solid rgba(135, 144, 125, 0.2);
+        }
+
+        .results-title {
+            font-family: 'Playfair Display', serif;
+            font-size: 1.3rem;
+            font-weight: 500;
+            color: var(--leather-dark);
+        }
+
+        .results-count {
+            font-size: 0.85rem;
+            color: var(--sage);
+        }
+
+        /* Recipe List */
+        .recipe-list {
+            display: flex;
+            flex-direction: column;
+            gap: 0.5rem;
+        }
+
+        /* Recipe Row */
+        .recipe-row {
+            display: flex;
+            align-items: center;
+            background: var(--warm-white);
+            border-radius: 8px;
+            padding: 0.85rem 1rem;
+            cursor: pointer;
+            transition: all 0.15s ease;
+            border: 1px solid transparent;
+        }
+
+        .recipe-row:hover {
+            background: var(--parchment);
+            border-color: rgba(139, 69, 19, 0.1);
+        }
+
+        .recipe-row:active {
+            transform: scale(0.995);
+        }
+
+        /* Category indicator - left bar */
+        .recipe-indicator {
+            width: 4px;
+            height: 32px;
+            border-radius: 2px;
+            margin-right: 1rem;
+            flex-shrink: 0;
+        }
+
+        .recipe-indicator.breakfast { background: var(--cat-breakfast); }
+        .recipe-indicator.soups { background: var(--cat-soups); }
+        .recipe-indicator.main { background: var(--cat-main); }
+        .recipe-indicator.sauces { background: var(--cat-sauces); }
+
+        .recipe-info {
+            flex: 1;
+            min-width: 0;
+        }
+
+        .recipe-title {
+            font-family: 'Playfair Display', serif;
+            font-size: 1.05rem;
+            font-weight: 500;
+            color: var(--leather-dark);
+            line-height: 1.3;
+        }
+
+        .recipe-meta {
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+            margin-top: 0.2rem;
+        }
+
+        .recipe-page {
+            font-size: 0.8rem;
+            color: var(--sage);
+        }
+
+        .recipe-tag {
+            font-size: 0.7rem;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+            padding: 0.15rem 0.5rem;
+            border-radius: 3px;
+            background: rgba(135, 144, 125, 0.12);
+            color: var(--sage);
+        }
+
+        .recipe-tag.breakfast { color: var(--cat-breakfast); background: rgba(196, 149, 106, 0.12); }
+        .recipe-tag.soups { color: var(--cat-soups); background: rgba(122, 158, 122, 0.12); }
+        .recipe-tag.main { color: var(--cat-main); background: rgba(176, 112, 112, 0.12); }
+        .recipe-tag.sauces { color: var(--cat-sauces); background: rgba(138, 122, 158, 0.12); }
+
+        .recipe-arrow {
+            width: 20px;
+            height: 20px;
+            opacity: 0;
+            transition: opacity 0.15s ease;
+            color: var(--sage);
+        }
+
+        .recipe-row:hover .recipe-arrow {
+            opacity: 0.5;
+        }
+
+        /* Empty State */
+        .empty-state {
+            text-align: center;
+            padding: 4rem 2rem;
+            color: var(--sage);
+        }
+
+        .empty-state h3 {
+            font-family: 'Playfair Display', serif;
+            font-size: 1.3rem;
+            color: var(--leather);
+            margin-bottom: 0.5rem;
+        }
+
+        /* Modal */
+        .modal-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(44, 44, 44, 0.6);
+            backdrop-filter: blur(3px);
+            z-index: 100;
+            opacity: 0;
+            visibility: hidden;
+            transition: all 0.25s ease;
+        }
+
+        .modal-overlay.active {
+            opacity: 1;
+            visibility: visible;
+        }
+
+        .modal {
+            position: fixed;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%) scale(0.95);
+            background: var(--warm-white);
+            width: 90%;
+            max-width: 640px;
+            max-height: 85vh;
+            border-radius: 12px;
+            z-index: 101;
+            opacity: 0;
+            visibility: hidden;
+            transition: all 0.25s ease;
+            overflow: hidden;
+            box-shadow: 0 20px 60px rgba(0,0,0,0.25);
+        }
+
+        .modal.active {
+            opacity: 1;
+            visibility: visible;
+            transform: translate(-50%, -50%) scale(1);
+        }
+
+        .modal-header {
+            padding: 1.5rem 1.5rem 1.25rem;
+            border-bottom: 1px solid rgba(135, 144, 125, 0.15);
+            position: relative;
+        }
+
+        .modal-close {
+            position: absolute;
+            top: 1rem;
+            right: 1rem;
+            width: 32px;
+            height: 32px;
+            background: var(--parchment);
+            border: none;
+            border-radius: 6px;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: all 0.15s ease;
+        }
+
+        .modal-close:hover {
+            background: var(--cream);
+        }
+
+        .modal-close svg {
+            width: 16px;
+            height: 16px;
+            stroke: var(--charcoal);
+        }
+
+        .modal-tag {
+            display: inline-block;
+            font-size: 0.7rem;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 0.08em;
+            padding: 0.25rem 0.6rem;
+            border-radius: 3px;
+            margin-bottom: 0.5rem;
+        }
+
+        .modal-tag.breakfast { color: var(--cat-breakfast); background: rgba(196, 149, 106, 0.15); }
+        .modal-tag.soups { color: var(--cat-soups); background: rgba(122, 158, 122, 0.15); }
+        .modal-tag.main { color: var(--cat-main); background: rgba(176, 112, 112, 0.15); }
+        .modal-tag.sauces { color: var(--cat-sauces); background: rgba(138, 122, 158, 0.15); }
+
+        .modal-title {
+            font-family: 'Playfair Display', serif;
+            font-size: 1.6rem;
+            font-weight: 600;
+            color: var(--leather-dark);
+            line-height: 1.25;
+            padding-right: 2rem;
+        }
+
+        .modal-page {
+            font-size: 0.85rem;
+            color: var(--sage);
+            margin-top: 0.35rem;
+        }
+
+        .modal-content {
+            padding: 1.5rem;
+            max-height: calc(85vh - 140px);
+            overflow-y: auto;
+        }
+
+        .modal-section {
+            margin-bottom: 1.75rem;
+        }
+
+        .modal-section:last-child {
+            margin-bottom: 0;
+        }
+
+        .modal-section-title {
+            font-size: 0.75rem;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 0.08em;
+            color: var(--sage);
+            margin-bottom: 0.75rem;
+        }
+
+        .modal-section ul {
+            list-style: none;
+        }
+
+        .modal-section ul li {
+            padding: 0.4rem 0;
+            padding-left: 1rem;
+            position: relative;
+            font-size: 0.95rem;
+            line-height: 1.5;
+            color: var(--charcoal);
+            border-bottom: 1px solid rgba(135, 144, 125, 0.08);
+        }
+
+        .modal-section ul li:last-child {
+            border-bottom: none;
+        }
+
+        .modal-section ul li::before {
+            content: '';
+            position: absolute;
+            left: 0;
+            top: 0.75rem;
+            width: 4px;
+            height: 4px;
+            background: var(--copper);
+            border-radius: 50%;
+        }
+
+        .modal-section ol {
+            list-style: none;
+            counter-reset: steps;
+        }
+
+        .modal-section ol li {
+            padding: 0.6rem 0;
+            padding-left: 2rem;
+            position: relative;
+            font-size: 0.95rem;
+            line-height: 1.55;
+            color: var(--charcoal);
+            counter-increment: steps;
+        }
+
+        .modal-section ol li::before {
+            content: counter(steps);
+            position: absolute;
+            left: 0;
+            top: 0.55rem;
+            width: 20px;
+            height: 20px;
+            background: var(--leather);
+            color: var(--cream);
+            border-radius: 50%;
+            font-size: 0.7rem;
+            font-weight: 600;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .modal-note {
+            background: var(--parchment);
+            border-left: 3px solid var(--copper);
+            padding: 0.75rem 1rem;
+            border-radius: 0 6px 6px 0;
+            font-size: 0.9rem;
+            font-style: italic;
+            color: var(--charcoal);
+            margin-top: 1rem;
+        }
+
+        /* Responsive */
+        @media (max-width: 900px) {
+            .sidebar {
+                display: none;
+            }
+
+            header {
+                flex-direction: column;
+                gap: 0.75rem;
+                padding: 1rem;
+            }
+
+            .header-search {
+                width: 100%;
+            }
+
+            main {
+                padding: 1rem;
+            }
+
+            /* Show category filter as horizontal scroll on mobile */
+            .mobile-categories {
+                display: flex;
+                gap: 0.5rem;
+                overflow-x: auto;
+                padding: 0.75rem 1rem;
+                background: var(--warm-white);
+                border-bottom: 1px solid rgba(135, 144, 125, 0.15);
+                -webkit-overflow-scrolling: touch;
+            }
+
+            .mobile-cat-btn {
+                display: flex;
+                align-items: center;
+                gap: 0.4rem;
+                padding: 0.5rem 0.75rem;
+                border: 1px solid rgba(135, 144, 125, 0.2);
+                background: var(--cream);
+                border-radius: 20px;
+                font-size: 0.8rem;
+                font-weight: 500;
+                white-space: nowrap;
+                cursor: pointer;
+                transition: all 0.15s ease;
+            }
+
+            .mobile-cat-btn.active {
+                background: var(--leather);
+                color: var(--cream);
+                border-color: var(--leather);
+            }
+
+            .mobile-cat-dot {
+                width: 8px;
+                height: 8px;
+                border-radius: 2px;
+            }
+
+            .mobile-cat-dot.all { background: var(--charcoal); }
+            .mobile-cat-dot.breakfast { background: var(--cat-breakfast); }
+            .mobile-cat-dot.soups { background: var(--cat-soups); }
+            .mobile-cat-dot.main { background: var(--cat-main); }
+            .mobile-cat-dot.sauces { background: var(--cat-sauces); }
+
+            .mobile-cat-btn.active .mobile-cat-dot {
+                background: var(--cream);
+            }
+        }
+
+        @media (min-width: 901px) {
+            .mobile-categories {
+                display: none;
+            }
+        }
+
+        /* Print */
+        @media print {
+            header, .sidebar, .mobile-categories, .modal-close {
+                display: none !important;
+            }
+
+            .modal-overlay, .modal {
+                position: static !important;
+                opacity: 1 !important;
+                visibility: visible !important;
+                transform: none !important;
+                background: white !important;
+                max-height: none !important;
+                box-shadow: none !important;
+            }
+        }
+    </style>
+</head>
+<body>
+    <header>
+        <div class="brand">
+            <h1>Pine Street Cafe</h1>
+            <span class="brand-divider">/</span>
+            <span class="brand-sub">Recipes</span>
+        </div>
+        <div class="header-search">
+            <input type="text" id="search" placeholder="Search recipes...">
+        </div>
+    </header>
+
+    <div class="mobile-categories" id="mobile-categories"></div>
+
+    <div class="layout">
+        <aside class="sidebar">
+            <p class="sidebar-title">Categories</p>
+            <ul class="category-list" id="category-list"></ul>
+        </aside>
+
+        <main>
+            <div class="results-header">
+                <h2 class="results-title" id="results-title">All Recipes</h2>
+                <span class="results-count" id="results-count">19 recipes</span>
+            </div>
+            <div class="recipe-list" id="recipe-list"></div>
+        </main>
+    </div>
+
+    <div class="modal-overlay" id="modal-overlay"></div>
+    <div class="modal" id="modal">
+        <div class="modal-header">
+            <button class="modal-close" id="modal-close">
+                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/>
+                </svg>
+            </button>
+            <span class="modal-tag" id="modal-tag"></span>
+            <h2 class="modal-title" id="modal-title"></h2>
+            <p class="modal-page" id="modal-page"></p>
+        </div>
+        <div class="modal-content" id="modal-content"></div>
+    </div>
+
+    <script>
+        const recipes = [
+            {
+                id: 1,
+                title: "Waffle/Pancake Recipe",
+                category: "breakfast",
+                page: "Page 1",
+                note: "Read Recipe Carefully before proceeding",
+                ingredients: [
+                    "1 (5 lb) bag Biscuit Mix",
+                    "40 Whole Eggs (do not use liquid eggs)",
+                    "1½ cups Vegetable Oil",
+                    "¼ cup Granulated Sugar",
+                    "2 Tbsp Vanilla Extract",
+                    "1½ quarts Whole Milk (start with this amount)"
+                ],
+                instructions: [
+                    "In the largest mixing bowl combine eggs, oil, sugar and vanilla extract.",
+                    "Add milk, whisk to combine with other ingredients.",
+                    "Start adding biscuit mix a bit at a time until completely incorporated.",
+                    "You may need to add additional milk during this process until the batter is the consistency of gravy."
+                ]
+            },
+            {
+                id: 2,
+                title: "Harvest Pumpkin Pancakes",
+                category: "breakfast",
+                page: "Page 2",
+                note: "Recipe Usually Doubled",
+                ingredients: [
+                    "2 cups Milk or plain un-sweetened rice, almond or soy",
+                    "1 cup canned Pumpkin Puree",
+                    "1 cup Whole Wheat Flour",
+                    "1 cup All Purpose Flour",
+                    "2 tsp Baking Powder",
+                    "1 tsp Baking Soda",
+                    "2 tsp ground Cinnamon",
+                    "1 tsp ground Allspice",
+                    "1/8 tsp Sea Salt"
+                ],
+                instructions: [
+                    "In a large bowl, whisk milk, pumpkin, eggs, oil, honey.",
+                    "In a medium bowl, whisk flours, baking powder, baking soda, cinnamon, allspice and salt.",
+                    "Add to the pumpkin mixture and mix. Batter should be thin.",
+                    "Keep mixture in an airtight container, labeled and dated."
+                ]
+            },
+            {
+                id: 3,
+                title: "French Toast Mix",
+                category: "breakfast",
+                page: "Page 3",
+                ingredients: [
+                    "1 each liquid Eggs",
+                    "1 each Half & Half",
+                    "2 tsp Cinnamon",
+                    "1½ tsp Nutmeg",
+                    "1½ Tbsp Vanilla",
+                    "2 scoops Sugar"
+                ],
+                instructions: [
+                    "Whisk all ingredients until thoroughly combined.",
+                    "Store in container labeled and dated."
+                ]
+            },
+            {
+                id: 4,
+                title: "Jackie's Granola",
+                category: "breakfast",
+                page: "Page 4",
+                note: "Recipe Usually Doubled. Can substitute coconut oil with butter or vegetable oil.",
+                ingredients: [
+                    "4 cups Old Fashioned Oats",
+                    "1½ cups sliced Almonds",
+                    "½ cup light Brown Sugar, packed",
+                    "½ tsp Cinnamon",
+                    "¼ tsp Kosher Salt",
+                    "⅓ cup Coconut Oil, Melted",
+                    "⅓ cup Honey",
+                    "2 tsp Vanilla Extract"
+                ],
+                instructions: [
+                    "Heat oven to 300 degrees. Prepare a baking sheet by lining with parchment paper.",
+                    "Mix the oats, almonds, brown sugar, cinnamon, and salt together in a large mixing bowl until combined. In a small, separate bowl, stir the melted coconut oil, honey, and vanilla together, then drizzle over the oat mixture, stirring together until well-combined.",
+                    "Transfer the granola mixture to the prepared baking sheet and spread it out in an even layer. Bake for 20-25 minutes, rotating the pan once halfway through for even toasting. Bake until golden and crispy and the almonds look lightly toasted (may take more than 25 minutes). Watch carefully as the granola can burn.",
+                    "Remove from oven and let the granola cool completely before transferring to an airtight container. Keeps for 2 weeks at room temperature."
+                ]
+            },
+            {
+                id: 5,
+                title: "Peanut Butter Waffles",
+                category: "breakfast",
+                page: "Page 6",
+                note: "OCR partially garbled - see original page for complete instructions",
+                ingredients: [
+                    "2 cups all-purpose flour",
+                    "3 Tbsp granulated sugar",
+                    "2 tsp baking powder",
+                    "1 tsp baking soda",
+                    "½ tsp cinnamon",
+                    "¼ tsp salt",
+                    "2 cups milk",
+                    "2 eggs",
+                    "¼ cup creamy peanut butter, warmed",
+                    "2 Tbsp melted butter"
+                ],
+                instructions: [
+                    "See original page for complete instructions."
+                ]
+            },
+            {
+                id: 6,
+                title: "Brioche French Toast",
+                category: "breakfast",
+                page: "Page 8",
+                meta: "Prep: 5 min | Cook: 15 min | Serves: 12 slices",
+                note: "Fry your brioche bread in a simple mixture with cozy spices like ginger and cinnamon. Golden brown, never eggy or soggy.",
+                ingredients: [
+                    "1 loaf brioche bread (Use a 1 lb loaf)",
+                    "4 large eggs",
+                    "1 cup milk",
+                    "2 tbsp real maple syrup",
+                    "2 tbsp molasses"
+                ],
+                instructions: [
+                    "Mix eggs, milk, maple syrup, and molasses.",
+                    "Slice brioche bread.",
+                    "Dip bread in mixture and fry until golden brown."
+                ]
+            },
+            {
+                id: 7,
+                title: "Beer Raised Waffles with Cheddar and Scallions",
+                category: "breakfast",
+                page: "Page 14",
+                meta: "Prep: 15 min | Cook: 20 min | Serves: 6-8 waffles",
+                ingredients: [
+                    "2 cups all purpose flour",
+                    "1 tablespoon baking powder",
+                    "1 teaspoon table salt",
+                    "1½ teaspoons freshly-ground black pepper",
+                    "¼ cup granulated sugar",
+                    "2 large eggs, separated",
+                    "½ cup unsalted butter, melted",
+                    "¼ cup milk",
+                    "12 ounces mild beer",
+                    "1 cup shredded cheddar",
+                    "¼ cup thinly-sliced scallions"
+                ],
+                instructions: [
+                    "In a large bowl, whisk together flour, baking powder, salt, pepper, and sugar.",
+                    "Add lightly-beaten egg yolks, milk, melted butter, and beer, whisking until combined (batter will remain just slightly lumpy).",
+                    "Stir in cheddar and scallions."
+                ]
+            },
+            {
+                id: 8,
+                title: "Grits",
+                category: "breakfast",
+                page: "Page 10",
+                ingredients: [
+                    "2 Sticks of Butter (8 oz)",
+                    "8 cups of Milk",
+                    "1½ cups of Grits",
+                    "2 teaspoons Salt",
+                    "2 teaspoons Pepper"
+                ],
+                instructions: [
+                    "Melt butter in silver saucepan.",
+                    "When melted, add milk to pot. Swirl to get milk residue off sides with milk and butter.",
+                    "Add salt and pepper.",
+                    "When mixture begins to simmer, add grits slowly while stirring.",
+                    "Cook until tender."
+                ]
+            },
+            {
+                id: 9,
+                title: "Chicken Tortilla Soup",
+                category: "soups",
+                page: "Page 30",
+                ingredients: [
+                    "2 oz olive oil",
+                    "1 yellow onion, finely minced",
+                    "4 garlic cloves, minced",
+                    "32 oz (4 cups) low-sodium chicken broth",
+                    "10-15 oz canned diced tomatoes or 2-3 fresh large jalapeño (seeded and diced)",
+                    "15-18 oz cans black beans, drained and rinsed",
+                    "18 oz frozen corn (no need to thaw)",
+                    "2 cups shredded cooked chicken",
+                    "1 tbsp lime juice, or to taste",
+                    "1 tbsp chili powder",
+                    "2 tsp cumin",
+                    "2 tsp kosher salt, or to taste",
+                    "1 tsp green pepper",
+                    "1½ tsp smoked paprika"
+                ],
+                instructions: [
+                    "See original page for detailed preparation steps."
+                ]
+            },
+            {
+                id: 10,
+                title: "Beef Soup",
+                category: "soups",
+                page: "Page 31",
+                meta: "Prep: 15 min | Cook: 1 hr | Serves: 8",
+                note: "Comfort food served cold or warmed",
+                ingredients: [
+                    "1 cup chopped onion",
+                    "1 cup chopped celery",
+                    "1 cup chopped carrots",
+                    "2 tbsp butter",
+                    "5 cups shredded smoked beef, finely chopped",
+                    "6 cups water",
+                    "28 oz can diced tomatoes",
+                    "½ cup dry pearl barley",
+                    "2 tsp salt",
+                    "1 tsp ground black pepper"
+                ],
+                instructions: [
+                    "Add the beef broth with water. Bring to a boil and simmer.",
+                    "Add the diced tomatoes. Cook for another 5 minutes, stirring often.",
+                    "Add onion and garlic and cook until tender."
+                ]
+            },
+            {
+                id: 11,
+                title: "Roasted Tomato Basil Soup",
+                category: "soups",
+                page: "Page 34",
+                note: "From The Barefoot Contessa Cookbook",
+                ingredients: [
+                    "3 pounds ripe plum tomatoes, cut in half",
+                    "¼ cup plus 2 tablespoons good olive oil",
+                    "1 tablespoon kosher salt",
+                    "1½ teaspoons freshly ground black pepper",
+                    "2 cups chopped yellow onions (2 onions)",
+                    "6 garlic cloves, minced",
+                    "2 tablespoons unsalted butter",
+                    "¼ teaspoon crushed red pepper flakes",
+                    "1 (28-ounce) canned plum tomatoes, with their juice",
+                    "4 cups fresh basil leaves, packed",
+                    "1 teaspoon fresh thyme leaves",
+                    "1 quart chicken stock, or water"
+                ],
+                instructions: [
+                    "Preheat the oven to 400 degrees F. Toss together the tomatoes, ¼ cup olive oil, salt, and pepper.",
+                    "Spread the tomatoes in 1 layer on a baking sheet and roast for 45 minutes.",
+                    "In an 8-quart stockpot over medium heat, saute the onions and garlic with 2 tablespoons of olive oil, the butter, and red pepper flakes for 10 minutes, until the onions start to brown.",
+                    "Add the canned tomatoes, basil, thyme, and chicken stock.",
+                    "Add the oven-roasted tomatoes, including the liquid on the baking sheet.",
+                    "Bring to a boil and simmer uncovered for 40 minutes.",
+                    "Pass through a food mill fitted with the coarsest blade.",
+                    "Taste for seasonings. Serve hot."
+                ]
+            },
+            {
+                id: 12,
+                title: "Chicken Dumplings",
+                category: "main",
+                page: "Page 13",
+                ingredients: [
+                    "Chicken broth (5 cups)",
+                    "Biscuit Mix (1 cup + more as needed)",
+                    "Milk (to soften)",
+                    "Diced chicken"
+                ],
+                instructions: [
+                    "Cook chicken until soft.",
+                    "Roll out dumplings and cut into pieces.",
+                    "Add to slightly rolling boil broth.",
+                    "Stir constantly."
+                ]
+            },
+            {
+                id: 13,
+                title: "Chicken Salad",
+                category: "main",
+                page: "Page 28",
+                ingredients: [
+                    "1/3 cup Green Grapes, cut in half",
+                    "Chicken (shredded)"
+                ],
+                instructions: [
+                    "Mix together well.",
+                    "Serve 1/3 cup Chicken Salad.",
+                    "Store in labeled and dated container. Keep cool."
+                ]
+            },
+            {
+                id: 14,
+                title: "Reuben Sandwich",
+                category: "main",
+                page: "Page 12",
+                note: "Page partially captured - see original for complete recipe",
+                ingredients: [
+                    "Swiss cheese",
+                    "Russian dressing"
+                ],
+                instructions: [
+                    "See original page for complete recipe."
+                ]
+            },
+            {
+                id: 15,
+                title: "Cholula Ranch",
+                category: "sauces",
+                page: "Page 17",
+                note: "Adjust to desired heat level",
+                ingredients: [
+                    "2 Tablespoons Cholula sauce",
+                    "Ranch dressing"
+                ],
+                instructions: [
+                    "Combine Cholula sauce with ranch dressing.",
+                    "Adjust to desired heat level."
+                ]
+            },
+            {
+                id: 16,
+                title: "Sriracha Mayo",
+                category: "sauces",
+                page: "Page 18",
+                ingredients: [
+                    "2 oz mayonnaise",
+                    "2-6 tbsp Sriracha hot sauce",
+                    "½ tsp additional seasonings to taste"
+                ],
+                instructions: [
+                    "In a bowl, combine the mayonnaise and Sriracha.",
+                    "Taste and adjust with additional Sriracha in one tablespoon increments.",
+                    "Add ½ tsp additional seasonings and adjust to taste."
+                ]
+            },
+            {
+                id: 17,
+                title: "Honey Mustard Dressing",
+                category: "sauces",
+                page: "Page 16",
+                note: "Makes about 3½ cups",
+                ingredients: [
+                    "1 cup mayonnaise (preferred style)",
+                    "1 cup vegetable or canola oil",
+                    "½ cup honey",
+                    "½ cup prepared yellow mustard",
+                    "1 cup apple cider vinegar",
+                    "¼ tsp cayenne pepper (or more to taste)"
+                ],
+                instructions: [
+                    "In a large bowl, blend mayonnaise, oil, honey, and mustard.",
+                    "Whisk in vinegar, then cayenne until smooth."
+                ]
+            },
+            {
+                id: 18,
+                title: "Bacon Marmalade",
+                category: "sauces",
+                page: "Page 22",
+                ingredients: [
+                    "1½ cups bacon bits",
+                    "1 tsp crushed red pepper flakes",
+                    "Marmalade"
+                ],
+                instructions: [
+                    "In a medium saucepan, cook bacon until crisp and some fat is rendered out. Do not discard the bacon fat (unless it's a copious amount).",
+                    "Add red pepper flakes.",
+                    "Stir the marmalade into the saucepan.",
+                    "Cook on low heat until marmalade is completely melted and all ingredients are thoroughly combined.",
+                    "Cool. Store in container, label and date."
+                ]
+            },
+            {
+                id: 19,
+                title: "Tomato Sauce",
+                category: "sauces",
+                page: "Page 24-25",
+                note: "Makes about 2 quarts (96 oz)",
+                ingredients: [
+                    "1½ tbsp olive oil",
+                    "3 cups finely diced onion",
+                    "2 oz (15-16 tbsp) tomato paste",
+                    "2 (28 oz) cans canned crushed tomatoes",
+                    "2 (28 oz) cans canned diced tomatoes",
+                    "6 tbsp minced garlic",
+                    "1 tbsp Italian seasoning",
+                    "¾ tsp salt",
+                    "½ tsp black pepper",
+                    "½ tsp crushed red pepper"
+                ],
+                instructions: [
+                    "Heat butter with oil in large Dutch oven over medium heat.",
+                    "Add shallots and garlic. Cook on medium heat, stirring constantly.",
+                    "Add tomato paste, constantly stirring 3 minutes until tender.",
+                    "Bring to a boil, then reduce to a low simmer, stirring until the sauce is thick (10-25 minutes)."
+                ]
+            }
+        ];
+
+        const categories = [
+            { id: 'all', name: 'All Recipes' },
+            { id: 'breakfast', name: 'Breakfast' },
+            { id: 'soups', name: 'Soups' },
+            { id: 'main', name: 'Main Dishes' },
+            { id: 'sauces', name: 'Sauces & Dressings' }
+        ];
+
+        const categoryLabels = {
+            breakfast: 'Breakfast',
+            soups: 'Soup',
+            main: 'Main',
+            sauces: 'Sauce'
+        };
+
+        let currentCategory = 'all';
+        let searchQuery = '';
+
+        // DOM
+        const recipeList = document.getElementById('recipe-list');
+        const resultsTitle = document.getElementById('results-title');
+        const resultsCount = document.getElementById('results-count');
+        const searchInput = document.getElementById('search');
+        const categoryList = document.getElementById('category-list');
+        const mobileCategories = document.getElementById('mobile-categories');
+        const modalOverlay = document.getElementById('modal-overlay');
+        const modal = document.getElementById('modal');
+        const modalClose = document.getElementById('modal-close');
+
+        // Count recipes per category
+        function getCounts() {
+            const counts = { all: recipes.length };
+            categories.slice(1).forEach(cat => {
+                counts[cat.id] = recipes.filter(r => r.category === cat.id).length;
+            });
+            return counts;
+        }
+
+        // Render sidebar categories
+        function renderCategories() {
+            const counts = getCounts();
+
+            // Desktop sidebar
+            categoryList.innerHTML = categories.map(cat => `
+                <li class="category-item ${currentCategory === cat.id ? 'active' : ''}" data-category="${cat.id}">
+                    <span class="category-dot ${cat.id}"></span>
+                    <span class="category-name">${cat.name}</span>
+                    <span class="category-count">${counts[cat.id]}</span>
+                </li>
+            `).join('');
+
+            // Mobile categories
+            mobileCategories.innerHTML = categories.map(cat => `
+                <button class="mobile-cat-btn ${currentCategory === cat.id ? 'active' : ''}" data-category="${cat.id}">
+                    <span class="mobile-cat-dot ${cat.id}"></span>
+                    ${cat.name}
+                </button>
+            `).join('');
+
+            // Event listeners
+            document.querySelectorAll('.category-item, .mobile-cat-btn').forEach(el => {
+                el.addEventListener('click', () => {
+                    currentCategory = el.dataset.category;
+                    renderCategories();
+                    renderRecipes();
+                });
+            });
+        }
+
+        // Filter recipes
+        function filterRecipes() {
+            return recipes.filter(recipe => {
+                const matchesCategory = currentCategory === 'all' || recipe.category === currentCategory;
+                const searchLower = searchQuery.toLowerCase();
+                const matchesSearch = !searchQuery ||
+                    recipe.title.toLowerCase().includes(searchLower) ||
+                    recipe.ingredients.some(ing => ing.toLowerCase().includes(searchLower));
+                return matchesCategory && matchesSearch;
+            });
+        }
+
+        // Render recipes
+        function renderRecipes() {
+            const filtered = filterRecipes();
+            const categoryName = categories.find(c => c.id === currentCategory)?.name || 'All Recipes';
+
+            resultsTitle.textContent = searchQuery ? `Search: "${searchQuery}"` : categoryName;
+            resultsCount.textContent = `${filtered.length} recipe${filtered.length !== 1 ? 's' : ''}`;
+
+            if (filtered.length === 0) {
+                recipeList.innerHTML = `
+                    <div class="empty-state">
+                        <h3>No recipes found</h3>
+                        <p>Try adjusting your search or category</p>
+                    </div>
+                `;
+                return;
+            }
+
+            recipeList.innerHTML = filtered.map(recipe => `
+                <article class="recipe-row" data-id="${recipe.id}">
+                    <div class="recipe-indicator ${recipe.category}"></div>
+                    <div class="recipe-info">
+                        <h3 class="recipe-title">${recipe.title}</h3>
+                        <div class="recipe-meta">
+                            <span class="recipe-page">${recipe.page}</span>
+                            <span class="recipe-tag ${recipe.category}">${categoryLabels[recipe.category]}</span>
+                        </div>
+                    </div>
+                    <svg class="recipe-arrow" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"/>
+                    </svg>
+                </article>
+            `).join('');
+
+            document.querySelectorAll('.recipe-row').forEach(row => {
+                row.addEventListener('click', () => openModal(parseInt(row.dataset.id)));
+            });
+        }
+
+        // Modal
+        function openModal(recipeId) {
+            const recipe = recipes.find(r => r.id === recipeId);
+            if (!recipe) return;
+
+            document.getElementById('modal-tag').className = `modal-tag ${recipe.category}`;
+            document.getElementById('modal-tag').textContent = categoryLabels[recipe.category];
+            document.getElementById('modal-title').textContent = recipe.title;
+            document.getElementById('modal-page').textContent = recipe.page + (recipe.meta ? ' · ' + recipe.meta : '');
+
+            let content = `
+                <div class="modal-section">
+                    <h3 class="modal-section-title">Ingredients</h3>
+                    <ul>
+                        ${recipe.ingredients.map(ing => `<li>${ing}</li>`).join('')}
+                    </ul>
+                </div>
+                <div class="modal-section">
+                    <h3 class="modal-section-title">Instructions</h3>
+                    <ol>
+                        ${recipe.instructions.map(inst => `<li>${inst}</li>`).join('')}
+                    </ol>
+                </div>
+            `;
+
+            if (recipe.note) {
+                content += `<p class="modal-note"><strong>Note:</strong> ${recipe.note}</p>`;
+            }
+
+            document.getElementById('modal-content').innerHTML = content;
+            modalOverlay.classList.add('active');
+            modal.classList.add('active');
+            document.body.style.overflow = 'hidden';
+        }
+
+        function closeModal() {
+            modalOverlay.classList.remove('active');
+            modal.classList.remove('active');
+            document.body.style.overflow = '';
+        }
+
+        // Events
+        searchInput.addEventListener('input', (e) => {
+            searchQuery = e.target.value;
+            renderRecipes();
+        });
+
+        modalClose.addEventListener('click', closeModal);
+        modalOverlay.addEventListener('click', closeModal);
+        document.addEventListener('keydown', (e) => {
+            if (e.key === 'Escape') closeModal();
+        });
+
+        // Init
+        renderCategories();
+        renderRecipes();
+    </script>
+</body>
+</html>
