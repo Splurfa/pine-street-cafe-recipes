@@ -7,6 +7,7 @@
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@500;600&family=DM+Sans:wght@400;500;600&display=swap" rel="stylesheet">
+    <script src="https://unpkg.com/convex@1.17.4/dist/browser.bundle.js"></script>
     <style>
         :root {
             --cream: #F5F0E6;
@@ -24,6 +25,10 @@
             --cat-soups: #7A9E7A;
             --cat-main: #B07070;
             --cat-sauces: #8A7A9E;
+            --cat-desserts: #D4A574;
+            --cat-appetizers: #9E8A7A;
+            --cat-sides: #7A8E9E;
+            --cat-salads: #8E9E7A;
         }
 
         * {
@@ -180,6 +185,10 @@
         .category-dot.soups { background: var(--cat-soups); }
         .category-dot.main { background: var(--cat-main); }
         .category-dot.sauces { background: var(--cat-sauces); }
+        .category-dot.desserts { background: var(--cat-desserts); }
+        .category-dot.appetizers { background: var(--cat-appetizers); }
+        .category-dot.sides { background: var(--cat-sides); }
+        .category-dot.salads { background: var(--cat-salads); }
 
         .category-name {
             font-size: 0.9rem;
@@ -265,6 +274,10 @@
         .recipe-indicator.soups { background: var(--cat-soups); }
         .recipe-indicator.main { background: var(--cat-main); }
         .recipe-indicator.sauces { background: var(--cat-sauces); }
+        .recipe-indicator.desserts { background: var(--cat-desserts); }
+        .recipe-indicator.appetizers { background: var(--cat-appetizers); }
+        .recipe-indicator.sides { background: var(--cat-sides); }
+        .recipe-indicator.salads { background: var(--cat-salads); }
 
         .recipe-info {
             flex: 1;
@@ -306,6 +319,10 @@
         .recipe-tag.soups { color: var(--cat-soups); background: rgba(122, 158, 122, 0.12); }
         .recipe-tag.main { color: var(--cat-main); background: rgba(176, 112, 112, 0.12); }
         .recipe-tag.sauces { color: var(--cat-sauces); background: rgba(138, 122, 158, 0.12); }
+        .recipe-tag.desserts { color: var(--cat-desserts); background: rgba(212, 165, 116, 0.12); }
+        .recipe-tag.appetizers { color: var(--cat-appetizers); background: rgba(158, 138, 122, 0.12); }
+        .recipe-tag.sides { color: var(--cat-sides); background: rgba(122, 142, 158, 0.12); }
+        .recipe-tag.salads { color: var(--cat-salads); background: rgba(142, 158, 122, 0.12); }
 
         .recipe-arrow {
             width: 20px;
@@ -424,6 +441,10 @@
         .modal-tag.soups { color: var(--cat-soups); background: rgba(122, 158, 122, 0.15); }
         .modal-tag.main { color: var(--cat-main); background: rgba(176, 112, 112, 0.15); }
         .modal-tag.sauces { color: var(--cat-sauces); background: rgba(138, 122, 158, 0.15); }
+        .modal-tag.desserts { color: var(--cat-desserts); background: rgba(212, 165, 116, 0.15); }
+        .modal-tag.appetizers { color: var(--cat-appetizers); background: rgba(158, 138, 122, 0.15); }
+        .modal-tag.sides { color: var(--cat-sides); background: rgba(122, 142, 158, 0.15); }
+        .modal-tag.salads { color: var(--cat-salads); background: rgba(142, 158, 122, 0.15); }
 
         .modal-title {
             font-family: 'Playfair Display', serif;
@@ -535,6 +556,239 @@
             margin-top: 1rem;
         }
 
+        /* Edit Mode */
+        .edit-toggle {
+            padding: 0.5rem 1rem;
+            font-size: 0.8rem;
+            font-family: 'DM Sans', sans-serif;
+            font-weight: 500;
+            background: transparent;
+            border: 1px solid rgba(255,255,255,0.3);
+            border-radius: 6px;
+            color: var(--cream);
+            cursor: pointer;
+            transition: all 0.2s ease;
+        }
+
+        .edit-toggle:hover {
+            background: rgba(255,255,255,0.1);
+            border-color: rgba(255,255,255,0.5);
+        }
+
+        .edit-toggle.active {
+            background: var(--copper);
+            border-color: var(--copper);
+        }
+
+        .recipe-row.edit-mode {
+            cursor: pointer;
+        }
+
+        .recipe-row.edit-mode:hover {
+            background: var(--parchment);
+            border-color: var(--copper);
+        }
+
+        .recipe-edit-indicator {
+            display: none;
+            color: var(--copper);
+            font-size: 0.75rem;
+            font-weight: 500;
+        }
+
+        .edit-mode .recipe-edit-indicator {
+            display: block;
+        }
+
+        .incomplete-badge {
+            background: #D4A574;
+            color: var(--leather-dark);
+            font-size: 0.65rem;
+            padding: 0.15rem 0.4rem;
+            border-radius: 3px;
+            font-weight: 600;
+            margin-left: 0.5rem;
+        }
+
+        /* Edit Modal */
+        .edit-modal {
+            position: fixed;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%) scale(0.95);
+            background: var(--warm-white);
+            border-radius: 16px;
+            width: 90%;
+            max-width: 700px;
+            max-height: 90vh;
+            overflow: auto;
+            z-index: 101;
+            box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+            opacity: 0;
+            visibility: hidden;
+            transition: all 0.3s ease;
+        }
+
+        .edit-modal.active {
+            opacity: 1;
+            visibility: visible;
+            transform: translate(-50%, -50%) scale(1);
+        }
+
+        .edit-modal-header {
+            padding: 1.5rem;
+            border-bottom: 1px solid rgba(135, 144, 125, 0.15);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .edit-modal-title {
+            font-family: 'Playfair Display', serif;
+            font-size: 1.3rem;
+            color: var(--leather-dark);
+        }
+
+        .edit-modal-close {
+            width: 32px;
+            height: 32px;
+            border-radius: 50%;
+            border: none;
+            background: rgba(135, 144, 125, 0.1);
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: all 0.2s ease;
+        }
+
+        .edit-modal-close:hover {
+            background: rgba(135, 144, 125, 0.2);
+        }
+
+        .edit-modal-body {
+            padding: 1.5rem;
+        }
+
+        .edit-field {
+            margin-bottom: 1.25rem;
+        }
+
+        .edit-field label {
+            display: block;
+            font-size: 0.8rem;
+            font-weight: 600;
+            color: var(--sage);
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+            margin-bottom: 0.5rem;
+        }
+
+        .edit-field input,
+        .edit-field select,
+        .edit-field textarea {
+            width: 100%;
+            padding: 0.75rem;
+            font-size: 0.95rem;
+            font-family: 'DM Sans', sans-serif;
+            border: 1px solid rgba(135, 144, 125, 0.25);
+            border-radius: 8px;
+            background: var(--cream);
+            color: var(--charcoal);
+            transition: all 0.2s ease;
+        }
+
+        .edit-field input:focus,
+        .edit-field select:focus,
+        .edit-field textarea:focus {
+            outline: none;
+            border-color: var(--leather);
+            box-shadow: 0 0 0 3px rgba(139, 69, 19, 0.1);
+        }
+
+        .edit-field textarea {
+            min-height: 120px;
+            resize: vertical;
+            line-height: 1.5;
+        }
+
+        .edit-field-help {
+            font-size: 0.75rem;
+            color: var(--sage);
+            margin-top: 0.3rem;
+        }
+
+        .edit-modal-actions {
+            padding: 1rem 1.5rem;
+            border-top: 1px solid rgba(135, 144, 125, 0.15);
+            display: flex;
+            justify-content: space-between;
+            gap: 1rem;
+        }
+
+        .edit-btn {
+            padding: 0.75rem 1.5rem;
+            font-size: 0.9rem;
+            font-family: 'DM Sans', sans-serif;
+            font-weight: 500;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: all 0.2s ease;
+        }
+
+        .edit-btn-primary {
+            background: var(--leather);
+            color: var(--cream);
+            border: none;
+        }
+
+        .edit-btn-primary:hover {
+            background: var(--leather-dark);
+        }
+
+        .edit-btn-secondary {
+            background: transparent;
+            color: var(--charcoal);
+            border: 1px solid rgba(135, 144, 125, 0.3);
+        }
+
+        .edit-btn-secondary:hover {
+            background: rgba(135, 144, 125, 0.1);
+        }
+
+        .edit-btn-danger {
+            background: transparent;
+            color: #B07070;
+            border: 1px solid #B07070;
+        }
+
+        .edit-btn-danger:hover {
+            background: #B07070;
+            color: white;
+        }
+
+        .edit-actions-left {
+            display: flex;
+            gap: 0.5rem;
+        }
+
+        .edit-actions-right {
+            display: flex;
+            gap: 0.5rem;
+        }
+
+        .saving-indicator {
+            display: none;
+            align-items: center;
+            gap: 0.5rem;
+            color: var(--sage);
+            font-size: 0.85rem;
+        }
+
+        .saving-indicator.active {
+            display: flex;
+        }
+
         /* Responsive */
         @media (max-width: 900px) {
             .sidebar {
@@ -555,57 +809,205 @@
                 padding: 1rem;
             }
 
-            /* Show category filter as horizontal scroll on mobile */
+            /* Mobile Category Selector Button */
             .mobile-categories {
-                display: flex;
-                gap: 0.5rem;
-                overflow-x: auto;
+                display: block;
                 padding: 0.75rem 1rem;
                 background: var(--warm-white);
                 border-bottom: 1px solid rgba(135, 144, 125, 0.15);
-                -webkit-overflow-scrolling: touch;
             }
 
-            .mobile-cat-btn {
+            .mobile-cat-trigger {
                 display: flex;
                 align-items: center;
-                gap: 0.4rem;
-                padding: 0.5rem 0.75rem;
-                border: 1px solid rgba(135, 144, 125, 0.2);
+                justify-content: space-between;
+                width: 100%;
+                padding: 0.75rem 1rem;
                 background: var(--cream);
-                border-radius: 20px;
-                font-size: 0.8rem;
+                border: 1px solid rgba(135, 144, 125, 0.25);
+                border-radius: 10px;
+                cursor: pointer;
+                transition: all 0.2s ease;
+            }
+
+            .mobile-cat-trigger:hover {
+                border-color: var(--leather);
+            }
+
+            .mobile-cat-trigger-left {
+                display: flex;
+                align-items: center;
+                gap: 0.75rem;
+            }
+
+            .mobile-cat-trigger-dot {
+                width: 12px;
+                height: 12px;
+                border-radius: 3px;
+            }
+
+            .mobile-cat-trigger-dot.all { background: var(--charcoal); }
+            .mobile-cat-trigger-dot.breakfast { background: var(--cat-breakfast); }
+            .mobile-cat-trigger-dot.soups { background: var(--cat-soups); }
+            .mobile-cat-trigger-dot.main { background: var(--cat-main); }
+            .mobile-cat-trigger-dot.sauces { background: var(--cat-sauces); }
+            .mobile-cat-trigger-dot.desserts { background: var(--cat-desserts); }
+            .mobile-cat-trigger-dot.appetizers { background: var(--cat-appetizers); }
+            .mobile-cat-trigger-dot.sides { background: var(--cat-sides); }
+            .mobile-cat-trigger-dot.salads { background: var(--cat-salads); }
+
+            .mobile-cat-trigger-text {
+                font-family: 'Playfair Display', serif;
+                font-size: 1rem;
                 font-weight: 500;
-                white-space: nowrap;
+                color: var(--leather-dark);
+            }
+
+            .mobile-cat-trigger-count {
+                font-size: 0.75rem;
+                color: var(--sage);
+                background: rgba(135, 144, 125, 0.15);
+                padding: 0.15rem 0.5rem;
+                border-radius: 10px;
+            }
+
+            .mobile-cat-trigger-icon {
+                width: 20px;
+                height: 20px;
+                color: var(--sage);
+                transition: transform 0.25s ease;
+            }
+
+            .mobile-cat-trigger.open .mobile-cat-trigger-icon {
+                transform: rotate(180deg);
+            }
+
+            /* Bottom Sheet Overlay */
+            .category-sheet-overlay {
+                position: fixed;
+                inset: 0;
+                background: rgba(44, 44, 44, 0.5);
+                backdrop-filter: blur(2px);
+                z-index: 90;
+                opacity: 0;
+                visibility: hidden;
+                transition: all 0.25s ease;
+            }
+
+            .category-sheet-overlay.active {
+                opacity: 1;
+                visibility: visible;
+            }
+
+            /* Bottom Sheet */
+            .category-sheet {
+                position: fixed;
+                bottom: 0;
+                left: 0;
+                right: 0;
+                background: var(--warm-white);
+                border-radius: 20px 20px 0 0;
+                z-index: 91;
+                transform: translateY(100%);
+                transition: transform 0.3s cubic-bezier(0.32, 0.72, 0, 1);
+                max-height: 70vh;
+                overflow: hidden;
+            }
+
+            .category-sheet.active {
+                transform: translateY(0);
+            }
+
+            .category-sheet-handle {
+                display: flex;
+                justify-content: center;
+                padding: 0.75rem;
+            }
+
+            .category-sheet-handle::before {
+                content: '';
+                width: 36px;
+                height: 4px;
+                background: rgba(135, 144, 125, 0.3);
+                border-radius: 2px;
+            }
+
+            .category-sheet-header {
+                padding: 0 1.25rem 1rem;
+                border-bottom: 1px solid rgba(135, 144, 125, 0.15);
+            }
+
+            .category-sheet-title {
+                font-family: 'Playfair Display', serif;
+                font-size: 1.1rem;
+                font-weight: 600;
+                color: var(--leather-dark);
+            }
+
+            .category-sheet-grid {
+                display: grid;
+                grid-template-columns: repeat(3, 1fr);
+                gap: 0.5rem;
+                padding: 1rem 1rem 2rem;
+                overflow-y: auto;
+            }
+
+            .category-sheet-item {
+                display: flex;
+                flex-direction: column;
+                align-items: center;
+                gap: 0.5rem;
+                padding: 1rem 0.5rem;
+                background: var(--cream);
+                border: 2px solid transparent;
+                border-radius: 12px;
                 cursor: pointer;
                 transition: all 0.15s ease;
             }
 
-            .mobile-cat-btn.active {
-                background: var(--leather);
-                color: var(--cream);
+            .category-sheet-item:hover {
+                background: var(--parchment);
+            }
+
+            .category-sheet-item.active {
                 border-color: var(--leather);
+                background: var(--parchment);
             }
 
-            .mobile-cat-dot {
-                width: 8px;
-                height: 8px;
-                border-radius: 2px;
+            .category-sheet-dot {
+                width: 16px;
+                height: 16px;
+                border-radius: 4px;
             }
 
-            .mobile-cat-dot.all { background: var(--charcoal); }
-            .mobile-cat-dot.breakfast { background: var(--cat-breakfast); }
-            .mobile-cat-dot.soups { background: var(--cat-soups); }
-            .mobile-cat-dot.main { background: var(--cat-main); }
-            .mobile-cat-dot.sauces { background: var(--cat-sauces); }
+            .category-sheet-dot.all { background: var(--charcoal); }
+            .category-sheet-dot.breakfast { background: var(--cat-breakfast); }
+            .category-sheet-dot.soups { background: var(--cat-soups); }
+            .category-sheet-dot.main { background: var(--cat-main); }
+            .category-sheet-dot.sauces { background: var(--cat-sauces); }
+            .category-sheet-dot.desserts { background: var(--cat-desserts); }
+            .category-sheet-dot.appetizers { background: var(--cat-appetizers); }
+            .category-sheet-dot.sides { background: var(--cat-sides); }
+            .category-sheet-dot.salads { background: var(--cat-salads); }
 
-            .mobile-cat-btn.active .mobile-cat-dot {
-                background: var(--cream);
+            .category-sheet-name {
+                font-size: 0.8rem;
+                font-weight: 500;
+                color: var(--charcoal);
+                text-align: center;
+                line-height: 1.2;
+            }
+
+            .category-sheet-count {
+                font-size: 0.7rem;
+                color: var(--sage);
             }
         }
 
         @media (min-width: 901px) {
-            .mobile-categories {
+            .mobile-categories,
+            .category-sheet-overlay,
+            .category-sheet {
                 display: none;
             }
         }
@@ -638,9 +1040,18 @@
         <div class="header-search">
             <input type="text" id="search" placeholder="Search recipes...">
         </div>
+        <button class="edit-toggle" id="edit-toggle">Edit Mode</button>
     </header>
 
     <div class="mobile-categories" id="mobile-categories"></div>
+    <div class="category-sheet-overlay" id="category-sheet-overlay"></div>
+    <div class="category-sheet" id="category-sheet">
+        <div class="category-sheet-handle"></div>
+        <div class="category-sheet-header">
+            <h3 class="category-sheet-title">Browse Categories</h3>
+        </div>
+        <div class="category-sheet-grid" id="category-sheet-grid"></div>
+    </div>
 
     <div class="layout">
         <aside class="sidebar">
@@ -651,9 +1062,11 @@
         <main>
             <div class="results-header">
                 <h2 class="results-title" id="results-title">All Recipes</h2>
-                <span class="results-count" id="results-count">19 recipes</span>
+                <span class="results-count" id="results-count">Loading...</span>
             </div>
-            <div class="recipe-list" id="recipe-list"></div>
+            <div class="recipe-list" id="recipe-list">
+                <p style="text-align: center; color: var(--sage); padding: 2rem;">Loading recipes...</p>
+            </div>
         </main>
     </div>
 
@@ -672,8 +1085,97 @@
         <div class="modal-content" id="modal-content"></div>
     </div>
 
+    <!-- Edit Modal -->
+    <div class="modal-overlay" id="edit-modal-overlay"></div>
+    <div class="edit-modal" id="edit-modal">
+        <div class="edit-modal-header">
+            <h2 class="edit-modal-title">Edit Recipe</h2>
+            <button class="edit-modal-close" id="edit-modal-close">
+                <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/>
+                </svg>
+            </button>
+        </div>
+        <div class="edit-modal-body">
+            <input type="hidden" id="edit-recipe-id">
+            <div class="edit-field">
+                <label for="edit-title">Title</label>
+                <input type="text" id="edit-title" placeholder="Recipe title">
+            </div>
+            <div class="edit-field">
+                <label for="edit-category">Category</label>
+                <select id="edit-category">
+                    <option value="breakfast">Breakfast</option>
+                    <option value="appetizers">Appetizers</option>
+                    <option value="soups">Soups</option>
+                    <option value="salads">Salads</option>
+                    <option value="main">Main Dishes</option>
+                    <option value="sides">Sides</option>
+                    <option value="sauces">Sauces</option>
+                    <option value="desserts">Desserts</option>
+                </select>
+            </div>
+            <div class="edit-field">
+                <label for="edit-ingredients">Ingredients</label>
+                <textarea id="edit-ingredients" placeholder="One ingredient per line"></textarea>
+                <p class="edit-field-help">Enter one ingredient per line</p>
+            </div>
+            <div class="edit-field">
+                <label for="edit-instructions">Instructions</label>
+                <textarea id="edit-instructions" placeholder="One step per line"></textarea>
+                <p class="edit-field-help">Enter one instruction per line</p>
+            </div>
+            <div class="edit-field">
+                <label for="edit-notes">Notes</label>
+                <textarea id="edit-notes" placeholder="Optional notes"></textarea>
+            </div>
+        </div>
+        <div class="edit-modal-actions">
+            <div class="edit-actions-left">
+                <button class="edit-btn edit-btn-danger" id="edit-delete">Delete</button>
+            </div>
+            <div class="edit-actions-right">
+                <span class="saving-indicator" id="saving-indicator">
+                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor">
+                        <circle cx="12" cy="12" r="10" stroke-width="2" stroke-dasharray="31.4" stroke-dashoffset="10">
+                            <animateTransform attributeName="transform" type="rotate" from="0 12 12" to="360 12 12" dur="1s" repeatCount="indefinite"/>
+                        </circle>
+                    </svg>
+                    Saving...
+                </span>
+                <button class="edit-btn edit-btn-secondary" id="edit-cancel">Cancel</button>
+                <button class="edit-btn edit-btn-primary" id="edit-save">Save Changes</button>
+            </div>
+        </div>
+    </div>
+
     <script>
-        const recipes = [
+        let recipes = [];
+        let editMode = false;
+        let currentEditRecipe = null;
+
+        // Initialize Convex client and fetch recipes
+        const convexClient = new convex.ConvexHttpClient("https://ideal-shark-493.convex.cloud");
+
+        async function loadRecipes() {
+            try {
+                recipes = await convexClient.query("recipes:listActive", {});
+                // Map Convex IDs to numeric IDs for compatibility
+                recipes = recipes.map((r, idx) => ({
+                    ...r,
+                    id: idx + 1,
+                    _convexId: r._id
+                }));
+                renderRecipeList(recipes);
+                updateSidebarCounts();
+            } catch (error) {
+                console.error("Failed to load recipes:", error);
+                document.querySelector('.recipe-list').innerHTML = '<p style="text-align: center; color: var(--sage); padding: 2rem;">Failed to load recipes. Please refresh.</p>';
+            }
+        }
+
+        // Legacy hardcoded recipes array - will be replaced by Convex data
+        const legacyRecipes = [
             {
                 id: 1,
                 title: "Waffle/Pancake Recipe",
@@ -1067,22 +1569,594 @@
                     "Add tomato paste, constantly stirring 3 minutes until tender.",
                     "Bring to a boil, then reduce to a low simmer, stirring until the sauce is thick (10-25 minutes)."
                 ]
+            },
+            // === NEW RECIPES FROM COMPLETE OCR REVIEW ===
+            {
+                id: 20,
+                title: "Chia Seed Pudding",
+                category: "breakfast",
+                page: "Page 5",
+                ingredients: [
+                    "3 (13.5 oz) cans Coconut Milk (may substitute 4 cups of regular coconut milk or almond milk)",
+                    "5 tablespoons Maple syrup",
+                    "¼ teaspoon ground Cinnamon",
+                    "⅛ teaspoon Sea Salt",
+                    "12 tablespoons Chia seeds (about ¾ cup)",
+                    "1 teaspoon Vanilla"
+                ],
+                instructions: [
+                    "In a large bowl, whisk together first 4 ingredients until combined well.",
+                    "Add in Chia seeds and whisk well to combine.",
+                    "Chill mixture for 1 hour. Whisk again to break up any clumps of seeds.",
+                    "Chill for a few hours more.",
+                    "After 3-4 hours it can be used for the Chia Breakfast Bowl. It is best if chilled for 12-18 hours (overnight)."
+                ]
+            },
+            {
+                id: 21,
+                title: "Chia Breakfast Bowl",
+                category: "breakfast",
+                page: "Page 5",
+                ingredients: [
+                    "Approximately 1½ cups chia seed pudding (in shallow pasta bowl)",
+                    "2 Strawberries, sliced (about 8 slices)",
+                    "Banana (8 bias sliced)",
+                    "Raspberries, about 6-8",
+                    "Blueberries, about 7-8 depending on size",
+                    "Granola, approximately ¾ cup"
+                ],
+                instructions: [
+                    "In center of chia seed pudding, sprinkle granola, on one side of bowl edge, line up banana slices.",
+                    "Place raspberries between banana and granola.",
+                    "On opposite side of granola, line up strawberry slices.",
+                    "Fill in space next to the strawberries with the blueberries.",
+                    "Serve with 1 slice of wheat toast and scoop of peanut butter."
+                ]
+            },
+            {
+                id: 22,
+                title: "Oatmeal",
+                category: "breakfast",
+                page: "Page 9",
+                ingredients: [
+                    "1 stick (4 oz) of Butter",
+                    "6 cups of Milk",
+                    "1 'just a pinch' of salt",
+                    "3 cups of Oats (Old Fashioned Oats only)"
+                ],
+                instructions: [
+                    "Melt butter over medium-low heat in saucepan.",
+                    "When melted, add milk. Add ½ cup of water to measuring cups and swirl to get any additional milk residue off the sides. Add to milk/butter mixture.",
+                    "Stir in salt.",
+                    "When mixture starts to simmer/bubble, stir in the oats. Make sure mixture is stirred well.",
+                    "Continue to simmer oatmeal for 5 minutes. Be careful to watch pot as mixture has a tendency to boil over.",
+                    "Turn off heat and remove oatmeal to finish absorbing liquid."
+                ]
+            },
+            {
+                id: 23,
+                title: "Easiest Gingerbread French Toast",
+                category: "breakfast",
+                page: "Page 7",
+                meta: "Prep: 5 min | Cook: 15 min | Serves: 12 slices",
+                note: "Gingerbread French Toast is a festive holiday recipe that comes together in no time. Fry your brioche bread in a simple batter of eggs, milk, molasses, and cozy spices like ginger and cinnamon. The finished product is perfectly golden brown, never eggy or soggy, and makes the easiest, coziest brunch!",
+                ingredients: [
+                    "1 loaf brioche bread (Use a 1 lb loaf - I recommend Trader Joe's Brioche)",
+                    "4 large eggs",
+                    "1 cup milk",
+                    "2 tbsp real maple syrup",
+                    "2 tbsp molasses",
+                    "1 tsp ground ginger",
+                    "½ tsp cinnamon",
+                    "⅛ tsp nutmeg",
+                    "⅛ tsp ground cloves",
+                    "1 tsp vanilla extract",
+                    "pinch of salt"
+                ],
+                instructions: [
+                    "Whisk together eggs, milk, maple syrup, molasses, ginger, cinnamon, nutmeg, cloves, vanilla, and salt.",
+                    "Slice brioche bread into thick slices.",
+                    "Dip each slice in the batter, coating both sides.",
+                    "Fry on a buttered griddle or pan until golden brown on each side.",
+                    "Serve with fresh rosemary (optional), fresh cranberries (optional), butter, maple syrup, and powdered sugar (optional)."
+                ]
+            },
+            {
+                id: 24,
+                title: "Easy Ham and Bean Soup",
+                category: "soups",
+                page: "Page 19",
+                meta: "Prep: 10 min | Cook: 30 min | Serves: 8",
+                note: "This ham and white bean soup recipe is hearty, uses pantry staples, and is so simple and easy. It gets thick and creamy like the chowders! It's the best way to use up leftover ham.",
+                ingredients: [
+                    "1 tablespoon olive oil",
+                    "½ cup medium onion (chopped finely)",
+                    "1 large carrot peeled & chopped small",
+                    "3 stalks celery (chopped)",
+                    "4 cloves garlic, minced",
+                    "¼ teaspoon Italian seasoning",
+                    "½ teaspoon smoked paprika",
+                    "4 cups chicken broth",
+                    "2 cups water",
+                    "2 cups cooked ham (chopped for more to taste)",
+                    "2 (14 ounce) cans white beans (drained)",
+                    "Salt & pepper to taste"
+                ],
+                instructions: [
+                    "Heat the oil over medium-high heat in a large soup pot. Saute the onions, carrot, and celery 7-10 minutes, stirring occasionally (a little browning is good).",
+                    "Stir in the garlic and cook for about 30 seconds.",
+                    "Add the Italian seasoning, smoked paprika, chicken broth, water, ham, and white beans to the pot. Increase heat to high and bring to a gentle boil. Reduce heat to medium (or medium-low if it's bubbling too much) close the pot with the lid slightly ajar, and let the soup simmer for 20-25 minutes (the flavor will intensify the longer you cook it for a bit).",
+                    "Season with salt & pepper to taste. Ham can be quite salty, so be sure to add salt after it's cooked. If you think it needs it. Optional: Take a potato masher and mash some of the beans right in the pot to give a slightly thicker texture or pulse an immersion blender a few times.",
+                    "Use low-sodium chicken broth if sensitive to salt.",
+                    "Crockpot method: try 8 hours on low or 3-4 hours on high.",
+                    "Instant Pot method: try 10 minutes on high pressure with a natural release."
+                ]
+            },
+            {
+                id: 25,
+                title: "Velveeta Cheesy Broccoli Soup",
+                category: "soups",
+                page: "Page 20",
+                meta: "Prep: 10 min | Cook: 15 min | Serves: 6",
+                note: "This Velveeta broccoli cheese soup recipe is the real deal. Pinch yourself. You're not dreaming. This thick, creamy broccoli Cheddar soup is ready in less than 30 minutes.",
+                ingredients: [
+                    "2 tablespoons butter or margarine",
+                    "¼ cup chopped onion",
+                    "2 tablespoons flour",
+                    "2 cups milk (add more if needed)",
+                    "½ pound VELVEETA, cut up",
+                    "1 (10 ounce) package frozen chopped broccoli, thawed, drained",
+                    "⅛ teaspoon pepper"
+                ],
+                instructions: [
+                    "Melt butter in a large saucepan on medium heat. Add onion; cook and stir until onion is tender, about 5 minutes. Add flour; cook 1 minute or until bubbly, stirring constantly.",
+                    "Stir in milk. Bring to boil. Reduce heat to medium-low; simmer for 1 minute.",
+                    "Add remaining ingredients: Velveeta cheese, broccoli, and pepper. Cook until cheese is melted and soup is heated through, stirring occasionally."
+                ]
+            },
+            {
+                id: 26,
+                title: "Roasted Red Pepper Soup with Pesto Croutons",
+                category: "soups",
+                page: "Page 21",
+                ingredients: [
+                    "¼ cup pesto",
+                    "6 sourdough bread slices",
+                    "1 tbsp butter",
+                    "1 tbsp olive oil",
+                    "1 garlic clove, finely chopped",
+                    "1 (15oz) jar roasted red bell peppers, rinsed and drained",
+                    "4 cups half and half sodium chicken broth",
+                    "¾ cup half and half",
+                    "1 Tbsp chopped fresh parsley",
+                    "Salt and pepper to taste"
+                ],
+                instructions: [
+                    "Melt butter with oil in large Dutch oven over medium high heat. Add garlic and shallots; cook 2 minutes until tender.",
+                    "Stir constantly. Add tomato paste and cook stirring constantly 1 minute. Stir in red peppers and chicken broth.",
+                    "Bring to a boil. Reduce heat and simmer 5 minutes.",
+                    "Process red pepper mixture in blender or food processor 8-10 seconds until smooth. Return to heat, stir in half and half and parsley, cook over medium heat 5 minutes. Season with salt and pepper.",
+                    "Top with sourdough and pesto croutons."
+                ]
+            },
+            {
+                id: 27,
+                title: "Smoked Beef Barley Soup",
+                category: "soups",
+                page: "Page 32",
+                meta: "Prep: 15 min | Cook: 1 hr 15 min | Serves: 8",
+                note: "A rich hearty soup using leftover smoked beef. Brisket, sirloin, or other smoked beef can work. Delicious comfort food for cold winter months.",
+                ingredients: [
+                    "1 cup chopped onion",
+                    "1 cup chopped celery",
+                    "1 cup chopped carrots",
+                    "2 tbsp butter",
+                    "2 cups smoked beef, finely chopped",
+                    "6 cups water",
+                    "6 cups beef broth",
+                    "1 (28 oz) can of diced tomatoes",
+                    "1½ cup dry pearl barley",
+                    "2 tsp salt",
+                    "1 tsp ground black pepper"
+                ],
+                instructions: [
+                    "In a large soup pot, cook onions, celery and carrots with the butter. Once the onions and celery are tender, about 6-8 minutes, add the beef.",
+                    "Cook, stirring often, for another 5 minutes.",
+                    "Add the water, beef broth and diced tomatoes. Bring to a boil and stir in the remaining ingredients.",
+                    "Let the soup cook at a low rolling boil for 30-45 minutes. The barley should be fully cooked and the beef should be tender."
+                ]
+            },
+            {
+                id: 28,
+                title: "Copycat Carrabba's Pollo Rosa Maria",
+                category: "main",
+                page: "Page 15",
+                note: "This is a good crispy version of this delicious favorite. It is modified from a version found on Recipe Goldmine.",
+                ingredients: [
+                    "4 boneless chicken breasts",
+                    "8 slices prosciutto",
+                    "¼ cup Fontina cheese",
+                    "½ cup clarified butter",
+                    "3 garlic cloves",
+                    "sweet onion, diced",
+                    "½ cup dry white wine",
+                    "4 tablespoons unsalted butter",
+                    "white pepper",
+                    "dash salt",
+                    "8 ounces sliced cremini mushrooms",
+                    "½ cup fresh basil, chopped",
+                    "lemon, juice of"
+                ],
+                instructions: [
+                    "Open chicken breasts and lay them lip open side up. Grill 2-5 minutes on each side until the inside is done.",
+                    "Remove one of the butterflied sides from each and stuff one of the sides with ½ oz cheese and top inside.",
+                    "Fold to sandwich the filling inside.",
+                    "Hold folded breasts with wooden picks.",
+                    "Sear one side. Remove breast and cover.",
+                    "In a large skillet saute butter and onions, add garlic in the clarified butter until tender.",
+                    "Deglaze the pan with the white wine.",
+                    "Add the butter, salt, and pepper, and mushrooms and cook until tender.",
+                    "Add basil and lemon juice and swirl pan to combine.",
+                    "Pour mushroom sauce over the Chicken breasts."
+                ]
+            },
+            {
+                id: 29,
+                title: "Tuna Salad",
+                category: "main",
+                page: "Page 27",
+                ingredients: [
+                    "3-5 oz cans Tuna in Water, drained (squeezed dry)",
+                    "⅓ cup Celery, diced small",
+                    "⅓ cup Yellow Onion, diced small",
+                    "¼ tsp Salt",
+                    "⅛ tsp Pepper",
+                    "⅓ cup Sweet Pickle Relish",
+                    "½ Tbsp prepared Horseradish",
+                    "⅓ cup Mayonnaise"
+                ],
+                instructions: [
+                    "Mix all ingredients together.",
+                    "Serve ⅓ cup Tuna Salad per sandwich.",
+                    "Store in labeled and dated container in cooler."
+                ]
+            },
+            {
+                id: 30,
+                title: "Quiche",
+                category: "main",
+                page: "Page 11",
+                note: "After 45 minutes, if quiche needs additional time, turn pan around in oven and continue baking until quiche is golden brown on top.",
+                ingredients: [
+                    "16 Eggs",
+                    "4 cups Half'n Half (or 1 whole quart)",
+                    "2 cups Mayonnaise",
+                    "8 Tablespoons Flour (½ cup)",
+                    "1⅓ cup minced White Onion",
+                    "1 tsp Garlic Powder (only 1 teaspoon!!)",
+                    "1 tsp Salt (only 1 teaspoon!!)",
+                    "4 cups shredded Swiss Cheese",
+                    "2 cups Bacon bits",
+                    "2 lb package Frozen Spinach (thawed and squeezed dry!)",
+                    "4 deep dish pie shells thawed and unbaked",
+                    "Bacon Bits – for topping",
+                    "Swiss, Shredded – for topping"
+                ],
+                instructions: [
+                    "Preheat oven to 350 degrees.",
+                    "Whisk eggs in large bowl.",
+                    "Add half & half, mayonnaise and flour to eggs. Mix well.",
+                    "Add onion, garlic powder, salt, Swiss cheese, bacon and spinach.",
+                    "Pour mixture into pie shells, dividing as evenly as possible.",
+                    "Top with bacon bits and then more Swiss cheese.",
+                    "Bake for 45 minutes or 1 hour until the top is golden brown."
+                ]
+            },
+            {
+                id: 31,
+                title: "Gravy",
+                category: "sauces",
+                page: "Page 10",
+                ingredients: [
+                    "8 oz Bacon Fat",
+                    "1 cup AP Flour (8 oz)",
+                    "2 teaspoons Salt",
+                    "2 teaspoons Pepper",
+                    "6-8 cups milk"
+                ],
+                instructions: [
+                    "Melt bacon fat on medium-low in large skillet or pot.",
+                    "Let bacon fat begin to bubble/simmer before adding flour. Whisk in flour to prevent clumps.",
+                    "Cook flour/fat mixture for 2 minutes, whisking occasionally.",
+                    "Begin adding milk. Whisking as you add.",
+                    "Continue whisking for 5 minutes to fully incorporate milk with flour.",
+                    "Add salt and pepper and stir in thoroughly.",
+                    "Bring mixture to a simmer, whisking occasionally.",
+                    "If mixture becomes too thick, add ½ cup milk at a time whisking in thoroughly.",
+                    "Continue with additional milk until gravy reaches desired consistency."
+                ]
+            },
+            {
+                id: 32,
+                title: "Russian Dressing",
+                category: "sauces",
+                page: "Page 12",
+                ingredients: [
+                    "1 tablespoon finely minced or grated onion",
+                    "1 cup mayonnaise",
+                    "¼ cup Ketchup",
+                    "3 teaspoons horseradish",
+                    "1 teaspoon Worcestershire sauce",
+                    "½ teaspoon paprika",
+                    "½ teaspoon salt"
+                ],
+                instructions: [
+                    "Combine all in a bowl.",
+                    "Refrigerate until ready to use."
+                ]
+            },
+            {
+                id: 33,
+                title: "Citrus Vinaigrette",
+                category: "sauces",
+                page: "Page 26",
+                note: "Recipe can be scaled - shown with handwritten adjustments for larger batches",
+                ingredients: [
+                    "½ cup vegetable oil (or 3 cups for large batch)",
+                    "3 tbsp red wine vinegar (or 1 cup for large batch)",
+                    "1 tbsp lemon juice (or ⅓ cup for large batch)",
+                    "½ tsp sugar (or 3 tsp for large batch)",
+                    "½ tsp salt",
+                    "½ tsp ground mustard (or 2 tsp for large batch)",
+                    "1 garlic clove, minced (or 4 tsp / 4 cloves for large batch)"
+                ],
+                instructions: [
+                    "Combine all ingredients in a jar with a tight-fitting lid.",
+                    "Shake vigorously until well combined.",
+                    "Store in refrigerator."
+                ]
+            },
+            {
+                id: 34,
+                title: "Spiced Butter",
+                category: "sauces",
+                page: "Page 26",
+                note: "Makes 8 oz / ½ quart",
+                ingredients: [
+                    "2 sticks butter, softened",
+                    "¼ cup brown sugar",
+                    "¼ tsp ground cloves",
+                    "¼ tsp nutmeg",
+                    "1½ heaping tsp cinnamon"
+                ],
+                instructions: [
+                    "Combine all ingredients and mix until well blended.",
+                    "Store in covered container in refrigerator."
+                ]
+            },
+            {
+                id: 35,
+                title: "Count Sauce",
+                category: "sauces",
+                page: "Page 22",
+                ingredients: [
+                    "2 cups granulated sugar",
+                    "2 eggs",
+                    "2 cups Orange Marmalade",
+                    "2 teaspoons Allspice",
+                    "2 teaspoons Nutmeg"
+                ],
+                instructions: [
+                    "In a medium saucepan, beat the 2 eggs and then whisk in sugar.",
+                    "Add marmalade and spices, combining thoroughly.",
+                    "Cook over low heat until sugar is no longer grainy.",
+                    "Cool. Place in container. Label, date and refrigerate."
+                ]
+            },
+            {
+                id: 36,
+                title: "Elvis Sauce",
+                category: "sauces",
+                page: "Page 22",
+                note: "CAUTION - the mixture may splatter and bubble and flame up (alcohol cooking off). Continue to stir until combined well. If it looks grainy/crystallized, place pan back on low heat to simmer. Simmer until all sugar is dissolved. Sometimes a small amount of hot water will help achieve this.",
+                ingredients: [
+                    "1 stick butter",
+                    "½ cup brown sugar",
+                    "1 ounce Rum"
+                ],
+                instructions: [
+                    "In medium saucepan, melt butter.",
+                    "Add brown sugar and stir. Mix until butter is well-combined. May look like caramel at this point.",
+                    "Remove from heat and add rum.",
+                    "Cool. Label, date and refrigerate."
+                ]
+            },
+            {
+                id: 37,
+                title: "French Dip Sauce (Au Jus)",
+                category: "sauces",
+                page: "Page 23",
+                note: "DOUBLE THIS RECIPE",
+                ingredients: [
+                    "8 Tablespoons Butter",
+                    "⅓ Cup finely minced Red Onion",
+                    "4 Teaspoons chopped Garlic",
+                    "4 Tablespoons Flour",
+                    "4 Cups Beef Broth",
+                    "2 Tablespoons Red Wine Vinegar"
+                ],
+                instructions: [
+                    "Melt butter into large sauce pot. Cook onion until translucent, then add garlic and saute 1 minute.",
+                    "Stir flour into butter mixture and cook about 3-4 minutes or until light blond colored roux.",
+                    "Whisk broth into flour mixture until fully incorporated and bring to boil. Boil until slightly thickened.",
+                    "Remove from heat and stir in red wine vinegar.",
+                    "Pour into containers, chill in ice bath. When cool; label, date and place in cooler."
+                ]
+            },
+            {
+                id: 38,
+                title: "Dill Spread",
+                category: "sauces",
+                page: "Page 25",
+                ingredients: [
+                    "16 oz Cream Cheese (Soft)",
+                    "½-1 tbsp dry dill",
+                    "1-2 tbsp of Mayo",
+                    "Dixie to taste"
+                ],
+                instructions: [
+                    "Combine all ingredients and mix until smooth.",
+                    "Adjust dill and seasonings to taste.",
+                    "Store in covered container in refrigerator."
+                ]
+            },
+            {
+                id: 39,
+                title: "Homemade Marinara Sauce (Large Batch)",
+                category: "sauces",
+                page: "Page 29",
+                note: "Makes about 96 oz (4 oz servings). Best made day before! May be frozen in an airtight container for up to 3 months. Defrost in cooler and reheat over low heat.",
+                ingredients: [
+                    "18 Tbsp Olive Oil (1⅛ cups)",
+                    "9 cups finely diced onion",
+                    "18 Tsp minced garlic",
+                    "252 oz canned crushed tomatoes (#10 can = 102 oz)",
+                    "252 oz canned tomato sauce (#10 can = 106 oz)",
+                    "18 Tbsp tomato paste",
+                    "9 Tsp Italian Seasoning",
+                    "9 Tsp Salt",
+                    "4.5 Tsp black pepper",
+                    "4.5 Tsp crushed red pepper",
+                    "9 to 18 Tsp sugar, to taste",
+                    "18 Tbsp fresh basil"
+                ],
+                instructions: [
+                    "Sauté the onion in olive oil over medium-high heat, until onion is nice and tender.",
+                    "Add in the garlic and cook until garlic is fragrant, about 30 seconds.",
+                    "Stir in the remaining ingredients and bring mixture to a low simmer, stirring frequently. Let sauce simmer for 20-25 minutes (or longer), until the sauce is thickened.",
+                    "Serve warm over fresh pasta."
+                ]
+            },
+            {
+                id: 40,
+                title: "Easy Homemade Marinara Sauce",
+                category: "sauces",
+                page: "Page 33",
+                meta: "Prep: 5 min | Cook: 25 min | Serves: 8 cups",
+                note: "This easy Homemade Marinara Sauce Recipe uses canned tomatoes, tomato paste, garlic and fresh basil to create a rich and hearty meatless Italian spaghetti sauce that's perfect for pasta, dips and more!",
+                ingredients: [
+                    "2 tbsp olive oil",
+                    "1 cup finely diced onion",
+                    "2 tsp minced garlic",
+                    "28 oz can crushed tomatoes",
+                    "28 oz can diced tomatoes",
+                    "2 tbsp tomato paste",
+                    "1 tsp Italian Seasoning",
+                    "1 tsp salt",
+                    "½ tsp black pepper",
+                    "½ tsp crushed red pepper",
+                    "1 to 2 tsp sugar, to taste",
+                    "2 tbsp fresh basil"
+                ],
+                instructions: [
+                    "Sauté the onion in olive oil over medium-high heat, until onion is nice and tender.",
+                    "Add in the garlic and cook until garlic is fragrant, about 30 seconds.",
+                    "Stir in the remaining ingredients and bring mixture to a low simmer, stirring frequently. Let sauce simmer for 20-25 minutes (or longer), until the sauce is thickened.",
+                    "Serve warm over fresh pasta."
+                ]
+            },
+            {
+                id: 41,
+                title: "Cilantro Cream Cheese Dip",
+                category: "sauces",
+                page: "Page 28",
+                note: "Also known as 'Slapper Crap' - mix in food processor until light green and no pieces left",
+                ingredients: [
+                    "16 oz Cream Cheese",
+                    "1 cup of Cilantro",
+                    "1 heaping tablespoon of mayo (about ¼ cup)"
+                ],
+                instructions: [
+                    "Put in food processor.",
+                    "Mix till light green and no pieces left."
+                ]
+            },
+            {
+                id: 42,
+                title: "House Seasoning",
+                category: "sauces",
+                page: "Page 26",
+                ingredients: [
+                    "1 cup kosher salt",
+                    "¼ cup pepper",
+                    "¼ cup garlic powder (Granulated Garlic)"
+                ],
+                instructions: [
+                    "Combine all ingredients and mix well.",
+                    "Store in airtight container."
+                ]
+            },
+            {
+                id: 43,
+                title: "Beurre Blanc",
+                category: "sauces",
+                page: "Page 26",
+                note: "A classic French butter sauce with hollandaise consistency. Add squeeze of lemon and capers.",
+                ingredients: [
+                    "¼ cup white wine vinegar",
+                    "¼ cup white wine",
+                    "1 Tbsp minced shallot",
+                    "¼ Tbsp salt",
+                    "⅛ tsp pepper",
+                    "2½ sticks chilled butter"
+                ],
+                instructions: [
+                    "Bring to boil first 5 ingredients. Reduce to half.",
+                    "Add ½ of butter, whisk till creamy paste.",
+                    "Reduce heat to low, beat in butter 1 pc at a time, whisking till hollandaise consistency.",
+                    "Remove from heat and strain.",
+                    "Add salt & pepper to taste. Add squeeze of lemon and capers."
+                ]
+            },
+            {
+                id: 44,
+                title: "Ruben Slapper",
+                category: "sauces",
+                page: "Page 35",
+                ingredients: [
+                    "2 cup spicy brown mustard",
+                    "¼ cup diced red onion",
+                    "¼ cup dill relish",
+                    "⅛ cup dill capers"
+                ],
+                instructions: [
+                    "Combine all ingredients.",
+                    "Mix well and refrigerate until ready to use."
+                ]
             }
         ];
 
         const categories = [
             { id: 'all', name: 'All Recipes' },
             { id: 'breakfast', name: 'Breakfast' },
+            { id: 'appetizers', name: 'Appetizers' },
             { id: 'soups', name: 'Soups' },
+            { id: 'salads', name: 'Salads' },
             { id: 'main', name: 'Main Dishes' },
-            { id: 'sauces', name: 'Sauces & Dressings' }
+            { id: 'sides', name: 'Sides' },
+            { id: 'sauces', name: 'Sauces' },
+            { id: 'desserts', name: 'Desserts' }
         ];
 
         const categoryLabels = {
             breakfast: 'Breakfast',
+            appetizers: 'Appetizer',
             soups: 'Soup',
+            salads: 'Salad',
             main: 'Main',
-            sauces: 'Sauce'
+            sides: 'Side',
+            sauces: 'Sauce',
+            desserts: 'Dessert'
         };
 
         let currentCategory = 'all';
@@ -1095,9 +2169,14 @@
         const searchInput = document.getElementById('search');
         const categoryList = document.getElementById('category-list');
         const mobileCategories = document.getElementById('mobile-categories');
+        const categorySheetOverlay = document.getElementById('category-sheet-overlay');
+        const categorySheet = document.getElementById('category-sheet');
+        const categorySheetGrid = document.getElementById('category-sheet-grid');
         const modalOverlay = document.getElementById('modal-overlay');
         const modal = document.getElementById('modal');
         const modalClose = document.getElementById('modal-close');
+
+        let sheetOpen = false;
 
         // Count recipes per category
         function getCounts() {
@@ -1108,9 +2187,21 @@
             return counts;
         }
 
+        // Update sidebar category counts
+        function updateSidebarCounts() {
+            const counts = getCounts();
+            document.querySelectorAll('.category-count').forEach((el, idx) => {
+                const category = categories[idx];
+                if (category) {
+                    el.textContent = counts[category.id];
+                }
+            });
+        }
+
         // Render sidebar categories
         function renderCategories() {
             const counts = getCounts();
+            const currentCat = categories.find(c => c.id === currentCategory);
 
             // Desktop sidebar
             categoryList.innerHTML = categories.map(cat => `
@@ -1121,22 +2212,73 @@
                 </li>
             `).join('');
 
-            // Mobile categories
-            mobileCategories.innerHTML = categories.map(cat => `
-                <button class="mobile-cat-btn ${currentCategory === cat.id ? 'active' : ''}" data-category="${cat.id}">
-                    <span class="mobile-cat-dot ${cat.id}"></span>
-                    ${cat.name}
+            // Mobile trigger button
+            mobileCategories.innerHTML = `
+                <button class="mobile-cat-trigger ${sheetOpen ? 'open' : ''}" id="mobile-cat-trigger">
+                    <div class="mobile-cat-trigger-left">
+                        <span class="mobile-cat-trigger-dot ${currentCategory}"></span>
+                        <span class="mobile-cat-trigger-text">${currentCat?.name || 'All Recipes'}</span>
+                        <span class="mobile-cat-trigger-count">${counts[currentCategory]}</span>
+                    </div>
+                    <svg class="mobile-cat-trigger-icon" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"/>
+                    </svg>
+                </button>
+            `;
+
+            // Mobile bottom sheet grid
+            categorySheetGrid.innerHTML = categories.map(cat => `
+                <button class="category-sheet-item ${currentCategory === cat.id ? 'active' : ''}" data-category="${cat.id}">
+                    <span class="category-sheet-dot ${cat.id}"></span>
+                    <span class="category-sheet-name">${cat.name}</span>
+                    <span class="category-sheet-count">${counts[cat.id]}</span>
                 </button>
             `).join('');
 
-            // Event listeners
-            document.querySelectorAll('.category-item, .mobile-cat-btn').forEach(el => {
+            // Desktop sidebar event listeners
+            document.querySelectorAll('.category-item').forEach(el => {
                 el.addEventListener('click', () => {
                     currentCategory = el.dataset.category;
                     renderCategories();
-                    renderRecipes();
+                    renderRecipeList();
                 });
             });
+
+            // Mobile trigger event listener
+            document.getElementById('mobile-cat-trigger')?.addEventListener('click', toggleSheet);
+
+            // Mobile sheet grid event listeners
+            document.querySelectorAll('.category-sheet-item').forEach(el => {
+                el.addEventListener('click', () => {
+                    currentCategory = el.dataset.category;
+                    closeSheet();
+                    renderCategories();
+                    renderRecipeList();
+                });
+            });
+        }
+
+        // Bottom sheet controls
+        function toggleSheet() {
+            if (sheetOpen) {
+                closeSheet();
+            } else {
+                openSheet();
+            }
+        }
+
+        function openSheet() {
+            sheetOpen = true;
+            categorySheetOverlay.classList.add('active');
+            categorySheet.classList.add('active');
+            document.getElementById('mobile-cat-trigger')?.classList.add('open');
+        }
+
+        function closeSheet() {
+            sheetOpen = false;
+            categorySheetOverlay.classList.remove('active');
+            categorySheet.classList.remove('active');
+            document.getElementById('mobile-cat-trigger')?.classList.remove('open');
         }
 
         // Filter recipes
@@ -1151,8 +2293,8 @@
             });
         }
 
-        // Render recipes
-        function renderRecipes() {
+        // Render recipe list
+        function renderRecipeList() {
             const filtered = filterRecipes();
             const categoryName = categories.find(c => c.id === currentCategory)?.name || 'All Recipes';
 
@@ -1169,14 +2311,22 @@
                 return;
             }
 
+            const isIncomplete = (recipe) => {
+                return !recipe.ingredients || recipe.ingredients.length === 0 ||
+                       !recipe.instructions || recipe.instructions.length === 0;
+            };
+
             recipeList.innerHTML = filtered.map(recipe => `
-                <article class="recipe-row" data-id="${recipe.id}">
+                <article class="recipe-row ${editMode ? 'edit-mode' : ''}" data-id="${recipe.id}">
                     <div class="recipe-indicator ${recipe.category}"></div>
                     <div class="recipe-info">
-                        <h3 class="recipe-title">${recipe.title}</h3>
+                        <h3 class="recipe-title">
+                            ${recipe.title}
+                            ${isIncomplete(recipe) ? '<span class="incomplete-badge">INCOMPLETE</span>' : ''}
+                        </h3>
                         <div class="recipe-meta">
-                            <span class="recipe-page">${recipe.page}</span>
                             <span class="recipe-tag ${recipe.category}">${categoryLabels[recipe.category]}</span>
+                            ${editMode ? '<span class="recipe-edit-indicator">Click to edit</span>' : ''}
                         </div>
                     </div>
                     <svg class="recipe-arrow" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -1186,7 +2336,14 @@
             `).join('');
 
             document.querySelectorAll('.recipe-row').forEach(row => {
-                row.addEventListener('click', () => openModal(parseInt(row.dataset.id)));
+                row.addEventListener('click', () => {
+                    const recipeId = parseInt(row.dataset.id);
+                    if (editMode) {
+                        openEditModal(recipeId);
+                    } else {
+                        openModal(recipeId);
+                    }
+                });
             });
         }
 
@@ -1198,7 +2355,7 @@
             document.getElementById('modal-tag').className = `modal-tag ${recipe.category}`;
             document.getElementById('modal-tag').textContent = categoryLabels[recipe.category];
             document.getElementById('modal-title').textContent = recipe.title;
-            document.getElementById('modal-page').textContent = recipe.page + (recipe.meta ? ' · ' + recipe.meta : '');
+            document.getElementById('modal-page').textContent = recipe.meta || '';
 
             let content = `
                 <div class="modal-section">
@@ -1231,21 +2388,135 @@
             document.body.style.overflow = '';
         }
 
+        // Edit Mode Functions
+        const editToggle = document.getElementById('edit-toggle');
+        const editModalOverlay = document.getElementById('edit-modal-overlay');
+        const editModal = document.getElementById('edit-modal');
+        const editModalClose = document.getElementById('edit-modal-close');
+        const editCancel = document.getElementById('edit-cancel');
+        const editSave = document.getElementById('edit-save');
+        const editDelete = document.getElementById('edit-delete');
+        const savingIndicator = document.getElementById('saving-indicator');
+
+        function toggleEditMode() {
+            editMode = !editMode;
+            editToggle.classList.toggle('active', editMode);
+            editToggle.textContent = editMode ? 'Exit Edit' : 'Edit Mode';
+            renderRecipeList();
+        }
+
+        function openEditModal(recipeId) {
+            const recipe = recipes.find(r => r.id === recipeId);
+            if (!recipe) return;
+
+            currentEditRecipe = recipe;
+            document.getElementById('edit-recipe-id').value = recipe._convexId;
+            document.getElementById('edit-title').value = recipe.title || '';
+            document.getElementById('edit-category').value = recipe.category || 'main';
+            document.getElementById('edit-ingredients').value = (recipe.ingredients || []).join('\n');
+            document.getElementById('edit-instructions').value = (recipe.instructions || []).join('\n');
+            document.getElementById('edit-notes').value = recipe.notes || '';
+
+            editModalOverlay.classList.add('active');
+            editModal.classList.add('active');
+            document.body.style.overflow = 'hidden';
+        }
+
+        function closeEditModal() {
+            editModalOverlay.classList.remove('active');
+            editModal.classList.remove('active');
+            document.body.style.overflow = '';
+            currentEditRecipe = null;
+        }
+
+        async function saveRecipe() {
+            const recipeId = document.getElementById('edit-recipe-id').value;
+            if (!recipeId) return;
+
+            const title = document.getElementById('edit-title').value.trim();
+            const category = document.getElementById('edit-category').value;
+            const ingredientsText = document.getElementById('edit-ingredients').value;
+            const instructionsText = document.getElementById('edit-instructions').value;
+            const notes = document.getElementById('edit-notes').value.trim();
+
+            const ingredients = ingredientsText.split('\n').map(s => s.trim()).filter(s => s);
+            const instructions = instructionsText.split('\n').map(s => s.trim()).filter(s => s);
+
+            savingIndicator.classList.add('active');
+            editSave.disabled = true;
+
+            try {
+                await convexClient.mutation("recipes:update", {
+                    id: recipeId,
+                    title,
+                    category,
+                    ingredients,
+                    instructions,
+                    notes: notes || undefined
+                });
+
+                await loadRecipes();
+                closeEditModal();
+            } catch (error) {
+                console.error("Failed to save recipe:", error);
+                alert("Failed to save recipe. Please try again.");
+            } finally {
+                savingIndicator.classList.remove('active');
+                editSave.disabled = false;
+            }
+        }
+
+        async function deleteRecipe() {
+            const recipeId = document.getElementById('edit-recipe-id').value;
+            if (!recipeId) return;
+
+            if (!confirm('Are you sure you want to delete this recipe? This cannot be undone.')) {
+                return;
+            }
+
+            savingIndicator.classList.add('active');
+            editDelete.disabled = true;
+
+            try {
+                await convexClient.mutation("recipes:remove", { id: recipeId });
+                await loadRecipes();
+                closeEditModal();
+            } catch (error) {
+                console.error("Failed to delete recipe:", error);
+                alert("Failed to delete recipe. Please try again.");
+            } finally {
+                savingIndicator.classList.remove('active');
+                editDelete.disabled = false;
+            }
+        }
+
+        // Edit mode event listeners
+        editToggle.addEventListener('click', toggleEditMode);
+        editModalClose.addEventListener('click', closeEditModal);
+        editModalOverlay.addEventListener('click', closeEditModal);
+        editCancel.addEventListener('click', closeEditModal);
+        editSave.addEventListener('click', saveRecipe);
+        editDelete.addEventListener('click', deleteRecipe);
+
         // Events
         searchInput.addEventListener('input', (e) => {
             searchQuery = e.target.value;
-            renderRecipes();
+            renderRecipeList();
         });
 
         modalClose.addEventListener('click', closeModal);
         modalOverlay.addEventListener('click', closeModal);
+        categorySheetOverlay.addEventListener('click', closeSheet);
         document.addEventListener('keydown', (e) => {
-            if (e.key === 'Escape') closeModal();
+            if (e.key === 'Escape') {
+                closeModal();
+                closeSheet();
+            }
         });
 
         // Init
         renderCategories();
-        renderRecipes();
+        loadRecipes();
     </script>
 </body>
 </html>
