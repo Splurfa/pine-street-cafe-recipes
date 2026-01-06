@@ -718,6 +718,164 @@
             margin-top: 0.3rem;
         }
 
+        /* Field List Container */
+        .field-list {
+            display: flex;
+            flex-direction: column;
+            gap: 0.75rem;
+        }
+
+        /* Individual Field Row */
+        .field-row {
+            display: flex;
+            align-items: flex-start;
+            gap: 0.75rem;
+            animation: slideIn 0.2s ease-out;
+        }
+
+        @keyframes slideIn {
+            from { opacity: 0; transform: translateY(-8px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .field-row.removing {
+            animation: fadeOut 0.15s ease-out forwards;
+        }
+
+        @keyframes fadeOut {
+            to { opacity: 0; }
+        }
+
+        /* Delete Button - 48px touch target */
+        .remove-field-btn {
+            width: 48px;
+            height: 48px;
+            min-width: 48px;
+            border: none;
+            background: rgba(176, 112, 112, 0.1);
+            color: var(--leather-dark);
+            border-radius: 50%;
+            cursor: pointer;
+            font-size: 1.5rem;
+            font-weight: 300;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: all 0.2s ease;
+        }
+
+        .remove-field-btn:hover,
+        .remove-field-btn:focus {
+            background: rgba(176, 112, 112, 0.25);
+            transform: scale(1.05);
+        }
+
+        .remove-field-btn:active {
+            transform: scale(0.95);
+        }
+
+        /* Step Number */
+        .step-number {
+            min-width: 2rem;
+            font-weight: 600;
+            color: var(--sage);
+            text-align: right;
+            padding-top: 0.85rem;
+            font-size: 0.95rem;
+        }
+
+        /* Input Fields - 48px height for touch */
+        .field-row input[type="text"] {
+            flex: 1;
+            min-height: 48px;
+            padding: 0.75rem 1rem;
+            border: 1px solid rgba(135, 144, 125, 0.3);
+            border-radius: 8px;
+            font-family: 'DM Sans', sans-serif;
+            font-size: 1rem;
+            background: var(--cream);
+            transition: all 0.2s ease;
+        }
+
+        .field-row textarea {
+            flex: 1;
+            min-height: 72px;
+            padding: 0.75rem 1rem;
+            border: 1px solid rgba(135, 144, 125, 0.3);
+            border-radius: 8px;
+            font-family: 'DM Sans', sans-serif;
+            font-size: 1rem;
+            background: var(--cream);
+            resize: vertical;
+            line-height: 1.5;
+            transition: all 0.2s ease;
+        }
+
+        .field-row input:focus,
+        .field-row textarea:focus {
+            outline: none;
+            border-color: var(--leather);
+            box-shadow: 0 0 0 3px rgba(139, 90, 43, 0.15);
+        }
+
+        /* Add Button - Full width, prominent */
+        .add-field-btn {
+            width: 100%;
+            min-height: 52px;
+            padding: 0.875rem 1.5rem;
+            margin-top: 0.75rem;
+            border: 2px dashed rgba(135, 144, 125, 0.4);
+            background: transparent;
+            color: var(--sage);
+            border-radius: 10px;
+            cursor: pointer;
+            font-family: 'DM Sans', sans-serif;
+            font-size: 1rem;
+            font-weight: 600;
+            transition: all 0.2s ease;
+        }
+
+        .add-field-btn:hover,
+        .add-field-btn:focus {
+            background: rgba(135, 144, 125, 0.1);
+            border-color: var(--sage);
+            transform: translateY(-1px);
+        }
+
+        .add-field-btn:active {
+            transform: translateY(0);
+        }
+
+        /* Empty State */
+        .field-list-empty {
+            text-align: center;
+            padding: 1.5rem;
+            color: var(--sage);
+            font-style: italic;
+            background: rgba(135, 144, 125, 0.05);
+            border-radius: 8px;
+            border: 1px dashed rgba(135, 144, 125, 0.2);
+        }
+
+        /* Mobile Adjustments for Field Lists */
+        @media (max-width: 600px) {
+            .field-row {
+                gap: 0.5rem;
+            }
+
+            .step-number {
+                min-width: 1.5rem;
+                font-size: 0.9rem;
+            }
+
+            .remove-field-btn {
+                width: 44px;
+                height: 44px;
+                min-width: 44px;
+                font-size: 1.3rem;
+            }
+        }
+
         .edit-modal-actions {
             padding: 1rem 1.5rem;
             border-top: 1px solid rgba(135, 144, 125, 0.15);
@@ -1116,14 +1274,18 @@
                 </select>
             </div>
             <div class="edit-field">
-                <label for="edit-ingredients">Ingredients</label>
-                <textarea id="edit-ingredients" placeholder="One ingredient per line"></textarea>
-                <p class="edit-field-help">Enter one ingredient per line</p>
+                <label>Ingredients</label>
+                <div id="ingredients-list" class="field-list"></div>
+                <button type="button" class="add-field-btn" id="add-ingredient">
+                    + Add Ingredient
+                </button>
             </div>
             <div class="edit-field">
-                <label for="edit-instructions">Instructions</label>
-                <textarea id="edit-instructions" placeholder="One step per line"></textarea>
-                <p class="edit-field-help">Enter one instruction per line</p>
+                <label>Instructions</label>
+                <div id="instructions-list" class="field-list"></div>
+                <button type="button" class="add-field-btn" id="add-instruction">
+                    + Add Step
+                </button>
             </div>
             <div class="edit-field">
                 <label for="edit-notes">Notes</label>
@@ -1153,6 +1315,110 @@
         let recipes = [];
         let editMode = false;
         let currentEditRecipe = null;
+        let currentIngredients = [];
+        let currentInstructions = [];
+
+        // ========== FIELD-BASED EDITING FUNCTIONS ==========
+        function escapeHtml(str) {
+            if (!str) return '';
+            return str.replace(/&/g, '&amp;')
+                      .replace(/</g, '&lt;')
+                      .replace(/>/g, '&gt;')
+                      .replace(/"/g, '&quot;')
+                      .replace(/'/g, '&#039;');
+        }
+
+        function renderIngredientFields() {
+            const list = document.getElementById('ingredients-list');
+
+            if (currentIngredients.length === 0) {
+                list.innerHTML = '<div class="field-list-empty">No ingredients yet</div>';
+                return;
+            }
+
+            list.innerHTML = currentIngredients.map((ing, i) => `
+                <div class="field-row" data-index="${i}">
+                    <button type="button" class="remove-field-btn"
+                            onclick="removeIngredient(${i})"
+                            aria-label="Remove ingredient">×</button>
+                    <input type="text"
+                           value="${escapeHtml(ing)}"
+                           oninput="updateIngredient(${i}, this.value)"
+                           placeholder="e.g., 2 cups flour"
+                           aria-label="Ingredient ${i + 1}">
+                </div>
+            `).join('');
+        }
+
+        function addIngredient() {
+            currentIngredients.push('');
+            renderIngredientFields();
+            requestAnimationFrame(() => {
+                const inputs = document.querySelectorAll('#ingredients-list input');
+                inputs[inputs.length - 1]?.focus();
+            });
+        }
+
+        function removeIngredient(index) {
+            const row = document.querySelector(`#ingredients-list .field-row[data-index="${index}"]`);
+            if (row) {
+                row.classList.add('removing');
+                setTimeout(() => {
+                    currentIngredients.splice(index, 1);
+                    renderIngredientFields();
+                }, 150);
+            }
+        }
+
+        function updateIngredient(index, value) {
+            currentIngredients[index] = value;
+        }
+
+        function renderInstructionFields() {
+            const list = document.getElementById('instructions-list');
+
+            if (currentInstructions.length === 0) {
+                list.innerHTML = '<div class="field-list-empty">No instructions yet</div>';
+                return;
+            }
+
+            list.innerHTML = currentInstructions.map((inst, i) => `
+                <div class="field-row" data-index="${i}">
+                    <button type="button" class="remove-field-btn"
+                            onclick="removeInstruction(${i})"
+                            aria-label="Remove step">×</button>
+                    <span class="step-number">${i + 1}.</span>
+                    <textarea oninput="updateInstruction(${i}, this.value)"
+                              placeholder="Describe this step..."
+                              aria-label="Step ${i + 1}"
+                              rows="2">${escapeHtml(inst)}</textarea>
+                </div>
+            `).join('');
+        }
+
+        function addInstruction() {
+            currentInstructions.push('');
+            renderInstructionFields();
+            requestAnimationFrame(() => {
+                const textareas = document.querySelectorAll('#instructions-list textarea');
+                textareas[textareas.length - 1]?.focus();
+            });
+        }
+
+        function removeInstruction(index) {
+            const row = document.querySelector(`#instructions-list .field-row[data-index="${index}"]`);
+            if (row) {
+                row.classList.add('removing');
+                setTimeout(() => {
+                    currentInstructions.splice(index, 1);
+                    renderInstructionFields();
+                }, 150);
+            }
+        }
+
+        function updateInstruction(index, value) {
+            currentInstructions[index] = value;
+        }
 
         // Initialize Convex client and fetch recipes
         const convexClient = new convex.ConvexHttpClient("https://ideal-shark-493.convex.cloud");
@@ -2413,9 +2679,15 @@
             document.getElementById('edit-recipe-id').value = recipe._convexId;
             document.getElementById('edit-title').value = recipe.title || '';
             document.getElementById('edit-category').value = recipe.category || 'main';
-            document.getElementById('edit-ingredients').value = (recipe.ingredients || []).join('\n');
-            document.getElementById('edit-instructions').value = (recipe.instructions || []).join('\n');
             document.getElementById('edit-notes').value = recipe.notes || '';
+
+            // Initialize field arrays
+            currentIngredients = recipe.ingredients?.length ? [...recipe.ingredients] : [];
+            currentInstructions = recipe.instructions?.length ? [...recipe.instructions] : [];
+
+            // Render field-based editors
+            renderIngredientFields();
+            renderInstructionFields();
 
             editModalOverlay.classList.add('active');
             editModal.classList.add('active');
@@ -2435,12 +2707,15 @@
 
             const title = document.getElementById('edit-title').value.trim();
             const category = document.getElementById('edit-category').value;
-            const ingredientsText = document.getElementById('edit-ingredients').value;
-            const instructionsText = document.getElementById('edit-instructions').value;
             const notes = document.getElementById('edit-notes').value.trim();
 
-            const ingredients = ingredientsText.split('\n').map(s => s.trim()).filter(s => s);
-            const instructions = instructionsText.split('\n').map(s => s.trim()).filter(s => s);
+            // Filter empty entries and trim whitespace
+            const ingredients = currentIngredients
+                .map(i => i.trim())
+                .filter(i => i !== '');
+            const instructions = currentInstructions
+                .map(i => i.trim())
+                .filter(i => i !== '');
 
             savingIndicator.classList.add('active');
             editSave.disabled = true;
@@ -2497,6 +2772,10 @@
         editCancel.addEventListener('click', closeEditModal);
         editSave.addEventListener('click', saveRecipe);
         editDelete.addEventListener('click', deleteRecipe);
+
+        // Field-based editor event listeners
+        document.getElementById('add-ingredient').addEventListener('click', addIngredient);
+        document.getElementById('add-instruction').addEventListener('click', addInstruction);
 
         // Events
         searchInput.addEventListener('input', (e) => {
